@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "workout-helper"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "workout_helper"}]
+
+[tool.poetry.dependencies]
+python = "3.11"
+notebook = "^6.5.2"
+numpy = "^1.24.1"
+pandas = "^1.5.2"
+openpyxl = "^3.0.10"
+ipykernel = "^6.19.4"
+redis = "^4.4.0"
+sqlalchemy = "^1.4.45"
+pyjwt = "^2.6.0"
+flake8 = "^6.0.0"
+black = "^22.12.0"
+flake8-print = "^5.0.0"
+flake8-pyproject = "^1.2.2"
+alembic = "^1.9.1"
+mypy = "^0.991"
+passlib = "^1.7.4"
+uvicorn = "^0.20.0"
+blacksheep = "^1.2.9"
+asyncpg = "^0.27.0"
+types-redis = "^4.3.21.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 79
+
+[tool.flake8]
+exclude = ['.git','__pycache__', '.env', 'venv']
+max-line-length = 79
+max-complexivity = 8
