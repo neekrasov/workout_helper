@@ -47,7 +47,7 @@ class UsersController(BaseController):
     def register(self) -> None:
         self.add_route(
             method="POST",
-            path="/create",
+            path="/",
             controller_method=self.create,
         )
         self.add_route(

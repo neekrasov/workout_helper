@@ -27,4 +27,4 @@ class UserService:
 
     async def create_user(self, user: User) -> None:
         await self._user_dao_writer.create_user(user)
-        await self._user_dao_writer.commit()
+        await self._uow.commit()

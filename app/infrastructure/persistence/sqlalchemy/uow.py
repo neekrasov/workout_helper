@@ -21,3 +21,6 @@ class UnitOfWorkImpl(UnitOfWork):
         self,
     ) -> AsyncContextManager[AsyncSessionTransaction]:
         return self._transaction()
+
+    async def commit(self) -> None:
+        await self._session.commit()

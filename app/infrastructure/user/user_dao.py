@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.user import protocols
 from app.core.user.entities import User
 
-from ..persistence.sqlalchemy.dao import DAOImpl, DAOWriterImpl
+from ..persistence.sqlalchemy.dao import DAOImpl, DAOImpl
 
 
 class UserDAOReaderImpl(protocols.UserDAOReader, DAOImpl):
@@ -19,7 +19,7 @@ class UserDAOReaderImpl(protocols.UserDAOReader, DAOImpl):
         return result.scalars().first()
 
 
-class UserDAOWriterImpl(protocols.UserDAOWriter, DAOWriterImpl):
+class UserDAOWriterImpl(protocols.UserDAOWriter, DAOImpl):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
