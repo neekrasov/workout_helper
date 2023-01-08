@@ -1,10 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.user import protocols
 from app.core.user.entities import User
 
-from ..persistence.sqlalchemy.dao import DAOImpl, DAOImpl
+from ..persistence.sqlalchemy.dao import DAOImpl
 
 
 class UserDAOReaderImpl(protocols.UserDAOReader, DAOImpl):
@@ -23,5 +22,6 @@ class UserDAOWriterImpl(protocols.UserDAOWriter, DAOImpl):
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def create_user(self, user: User) -> None:
+    def create_user(self, user: User) -> None:
+        user.id = user.generate_id()
         self._session.add(user)

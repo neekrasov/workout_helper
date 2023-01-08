@@ -1,10 +1,10 @@
 from typing import Protocol
-from app.core.common.dao import DAO
+from app.core.common.base.dao import DAO
 from ..entities.user import User
 
 
 class UserDAOWriter(DAO, Protocol):
-    async def create_user(self, user: User) -> None:
+    def create_user(self, user: User) -> None:
         ...
 
 

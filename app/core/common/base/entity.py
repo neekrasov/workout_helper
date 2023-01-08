@@ -1,13 +1,10 @@
 from uuid import UUID, uuid4
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class Entity:
-    id: UUID
-
-    def __eq__(self, other):
-        return self.id == other.id
+    id: UUID = field(init=False)
 
     @classmethod
     def generate_id(cls) -> UUID:

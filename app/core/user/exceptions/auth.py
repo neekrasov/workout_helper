@@ -1,4 +1,4 @@
-from ...common.exceptions import BaseAppException
+from ...common.base.exceptions import BaseAppException
 
 
 class InvalidTokenException(BaseAppException):

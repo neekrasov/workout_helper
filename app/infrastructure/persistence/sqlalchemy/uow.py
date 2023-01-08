@@ -1,7 +1,9 @@
 import contextlib
 from typing import AsyncGenerator, AsyncContextManager
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncSessionTransaction
-from app.core.common.uow import UnitOfWork
+from sqlalchemy.exc import IntegrityError
+from app.core.common.base.uow import UnitOfWork
+from app.core.common.base.exceptions import UniqueConstraintViolation
 
 
 class UnitOfWorkImpl(UnitOfWork):
@@ -23,4 +25,8 @@ class UnitOfWorkImpl(UnitOfWork):
         return self._transaction()
 
     async def commit(self) -> None:
-        await self._session.commit()
+        try:
+            await self._session.commit()
+        except IntegrityError:
+            await self._session.rollback()
+            raise UniqueConstraintViolation()

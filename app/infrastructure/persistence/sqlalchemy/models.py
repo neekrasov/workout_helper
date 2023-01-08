@@ -1,4 +1,4 @@
-from sqlalchemy import MetaData, Table, Column, String
+from sqlalchemy import MetaData, Table, Column, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import registry
 
@@ -13,7 +13,8 @@ user = Table(
     Column("id", UUID(as_uuid=True), primary_key=True),
     Column("username", String, nullable=False),
     Column("hashed_password", String, nullable=False),
-    Column("email", String, nullable=False, unique=True),
+    Column("email", String, nullable=False),
+    UniqueConstraint("email", name="unique_email"),
 )
 
 

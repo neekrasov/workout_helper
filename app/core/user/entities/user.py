@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from app.core.common.entity import Entity
+from app.core.common.base.entity import Entity
 
 
 @dataclass

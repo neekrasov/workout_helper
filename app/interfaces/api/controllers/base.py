@@ -8,6 +8,7 @@ from blacksheep.server.routing import RoutesRegistry
 
 
 from app.settings import Settings
+from app.core.common.cqs import MediatorProtocol
 
 _HandlerType = TypeVar("_HandlerType", bound=Callable[..., Any])
 
@@ -18,10 +19,12 @@ class BaseController(ApiController):
         router: RoutesRegistry,
         settings: Settings,
         docs: OpenAPIHandler,
+        mediator: MediatorProtocol,
     ) -> None:
         self._router = router
         self._settings = settings
         self._docs = docs
+        self._mediator = mediator
 
     @abc.abstractmethod
     def register(self) -> None:

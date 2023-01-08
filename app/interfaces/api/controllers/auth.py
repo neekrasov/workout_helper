@@ -1,7 +1,6 @@
 import http
+from uuid import UUID
 from blacksheep import FromForm, FromQuery
-
-from app.core.user.usecases.auth_service import AuthUserService
 from app.core.user.exceptions.auth import (
     SessionNotFoundException,
     InvalidCredentialsException,
@@ -9,18 +8,24 @@ from app.core.user.exceptions.auth import (
 from .base import BaseController
 from ..models.auth import LoginFormInputRequest
 
+from app.core.user.usecases.auth import (
+    LoginUserUseCase,
+    LogoutUserUseCase,
+)
+
 
 class AuthController(BaseController):
 
     async def login(
         self,
         form_data: FromForm[LoginFormInputRequest],
-        auth_service: AuthUserService
+        login_usecase: LoginUserUseCase,
     ):
         form = form_data.value
         try:
-            session_id = await auth_service.login(
-                email=form.username, raw_password=form.password
+            session_id = await login_usecase.execute(
+                form.username,
+                form.password,
             )
         except InvalidCredentialsException:
             return self.pretty_json(
@@ -33,11 +38,11 @@ class AuthController(BaseController):
 
     async def logout(
         self,
-        session_id: FromQuery[str],
-        auth_service: AuthUserService
+        session_id: FromQuery[UUID],
+        logout_usecase: LogoutUserUseCase,
     ):
         try:
-            user_id = await auth_service.logout(session_id.value)
+            user_id = await logout_usecase.execute(session_id.value)
         except SessionNotFoundException:
             return self.pretty_json(
                 status=http.HTTPStatus.NOT_FOUND,
