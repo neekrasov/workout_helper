@@ -1,14 +1,12 @@
 import abc
 from typing import Any, TypeVar, Optional, Callable
-
 from blacksheep.server.controllers import ApiController
 from blacksheep.server.openapi.common import EndpointDocs
 from blacksheep.server.openapi.v3 import OpenAPIHandler
 from blacksheep.server.routing import RoutesRegistry
 
-
 from app.settings import Settings
-from app.core.common.cqs import MediatorProtocol
+from app.core.common.mediator import Mediator
 
 _HandlerType = TypeVar("_HandlerType", bound=Callable[..., Any])
 
@@ -19,7 +17,7 @@ class BaseController(ApiController):
         router: RoutesRegistry,
         settings: Settings,
         docs: OpenAPIHandler,
-        mediator: MediatorProtocol,
+        mediator: Mediator,
     ) -> None:
         self._router = router
         self._settings = settings
@@ -29,7 +27,6 @@ class BaseController(ApiController):
     @abc.abstractmethod
     def register(self) -> None:
         raise NotImplementedError()
-        ...
 
     def add_route(
         self,

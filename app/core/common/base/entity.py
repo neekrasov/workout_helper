@@ -1,11 +1,13 @@
-from uuid import UUID, uuid4
+from typing import Optional, TypeVar, Generic
 from dataclasses import dataclass, field
+
+ID = TypeVar("ID")
 
 
 @dataclass
-class Entity:
-    id: UUID = field(init=False)
+class Entity(Generic[ID]):
+    id: Optional[ID] = field(init=False, default=None)
 
     @classmethod
-    def generate_id(cls) -> UUID:
-        return uuid4()
+    def generate_id(cls) -> ID:
+        raise NotImplementedError

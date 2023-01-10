@@ -29,6 +29,7 @@ asyncpg = "^0.27.0"
 types-redis = "^4.3.21.7"
 sklearn = "^0.0.post1"
 scikit-learn = "^1.2.0"
+celery = {extras = ["redis"], version = "^5.2.7"}
 
 
 [build-system]

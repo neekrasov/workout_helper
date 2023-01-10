@@ -42,3 +42,4 @@ dmypy.json
 .~lock*
 .ipynb_checkpoints
 trash/
+analysis/

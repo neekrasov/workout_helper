@@ -1,10 +1,10 @@
 import http
 from blacksheep import FromJSON
-from app.core.user.usecases.auth_service import AuthUserService
-from app.core.user.exceptions.users import UserAlreadyExistsException
-from app.core.user.services.create_user import CreateUserCommand
 from guardpost.authentication import User as GuardpostUser
 
+from app.core.user.services.auth_service import AuthUserService
+from app.core.user.exceptions.users import UserAlreadyExistsException
+from app.core.user.usecases.create_user import CreateUserCommand
 from .base import BaseController
 from ..models.user import UserCreateRequest
 

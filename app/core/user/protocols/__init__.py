@@ -1,2 +1,2 @@
-from .tokens_storage_dao import TokensStorageDAO # noqa
-from .user_dao import UserDAOReader, UserDAOWriter # noqa
+from .token_gateway import TokenGateway # noqa
+from .user_gateway import UserReadGateway, UserWriteGateway # noqa

@@ -1,6 +1,9 @@
 import http
-from uuid import UUID
+import uuid
 from blacksheep import FromForm, FromQuery
+
+from app.core.user.usecases.login_user import LoginUserCommand
+from app.core.user.usecases.logout_user import LogoutUserCommand
 from app.core.user.exceptions.auth import (
     SessionNotFoundException,
     InvalidCredentialsException,
@@ -8,54 +11,44 @@ from app.core.user.exceptions.auth import (
 from .base import BaseController
 from ..models.auth import LoginFormInputRequest
 
-from app.core.user.usecases.auth import (
-    LoginUserUseCase,
-    LogoutUserUseCase,
-)
-
 
 class AuthController(BaseController):
-
     async def login(
         self,
         form_data: FromForm[LoginFormInputRequest],
-        login_usecase: LoginUserUseCase,
     ):
         form = form_data.value
         try:
-            session_id = await login_usecase.execute(
-                form.username,
-                form.password,
+            session_id = await self._mediator.send(
+                LoginUserCommand(
+                    form.username,
+                    form.password,
+                )
             )
         except InvalidCredentialsException:
             return self.pretty_json(
                 status=http.HTTPStatus.UNAUTHORIZED,
-                data={
-                    "detail": "Invalid credentials"
-                }
+                data={"detail": "Invalid credentials"},
             )
         return self.json({"session_id": session_id})
 
     async def logout(
         self,
-        session_id: FromQuery[UUID],
-        logout_usecase: LogoutUserUseCase,
+        session_id: FromQuery[uuid.UUID],
     ):
         try:
-            user_id = await logout_usecase.execute(session_id.value)
+            user_id = await self._mediator.send(
+                LogoutUserCommand(session_id.value)
+            )
         except SessionNotFoundException:
             return self.pretty_json(
                 status=http.HTTPStatus.NOT_FOUND,
-                data={
-                    "detail": "Session not found"
-                }
+                data={"detail": "Session not found"},
             )
         return self.pretty_json(
-                status=http.HTTPStatus.ACCEPTED,
-                data={
-                    "detail": f"User {user_id} logged out"
-                }
-            )
+            status=http.HTTPStatus.ACCEPTED,
+            data={"detail": f"User {user_id} logged out"},
+        )
 
     @classmethod
     def version(cls) -> str:

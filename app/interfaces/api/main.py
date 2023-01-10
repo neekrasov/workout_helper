@@ -3,37 +3,33 @@ from blacksheep.server.openapi.v3 import OpenAPIHandler
 
 from app.settings import Settings
 from app.core.common.base.uow import UnitOfWork
-from app.core.common.cqs import MediatorProtocol
-from app.infrastructure.persistence.sqlalchemy.models import start_mappers
+from app.core.common.mediator import Mediator
+from app.infrastructure.persistence.sqlalchemy.mapping import start_mappers
 from app.infrastructure.persistence.sqlalchemy.uow import UnitOfWorkImpl
-from app.infrastructure.user.tokens_storage_dao import TokensStorageDAOImpl
-from app.infrastructure.user.user_dao import (
-    UserDAOWriterImpl,
-    UserDAOReaderImpl,
+from app.infrastructure.persistence.redis.token_gateway import TokenGatewayImpl
+from app.infrastructure.persistence.sqlalchemy.gateways import (
+    UserWriteGatewayImpl,
+    UserReadGatewayImpl,
 )
-# from app.core.user.usecases.user_service import UserService
-from app.core.user.usecases.auth_service import AuthUserService
-from app.core.user.protocols.tokens_storage_dao import TokensStorageDAO
-from app.core.user.protocols.user_dao import UserDAOWriter, UserDAOReader
-from app.core.user.usecases.auth import (
-    GetCurrentUserUseCase,
-    LoginUserUseCase,
-    LogoutUserUseCase,
+from app.core.user.protocols.token_gateway import TokenGateway
+from app.core.user.protocols.user_gateway import (
+    UserWriteGateway,
+    UserReadGateway
 )
-
-
+from app.core.workout.protocols.analysis import AnalysisSportsGround
+from app.infrastructure.worker.analysis import AnalysisSportsGroundImpl
+from .factories.mediator import mediator_factory
 from .security.auth_handler import AuthHandler
-
+from .factories.celery import celery_factory
 from .factories.sqlalchemy import (
     sa_engine_factory,
     sa_sessionmaker_factory,
     sa_asyncsession_factory,
 )
-
 from .factories.base import (
     openapi_docs_factory,
     redis_client_factory,
-    mediator_factory,
+    auth_user_service_factory,
 )
 from . import controllers
 
@@ -53,6 +49,7 @@ class ApplicationBuilder:
         self._app.services.add_exact_transient(Settings)
         self._app.services.add_singleton_by_factory(openapi_docs_factory)
         self._app.services.add_scoped_by_factory(mediator_factory)
+        self._app.services.add_scoped_by_factory(celery_factory)
 
         # Databases
         self._app.services.add_scoped_by_factory(sa_engine_factory)
@@ -62,30 +59,30 @@ class ApplicationBuilder:
         self._app.services.add_scoped(UnitOfWork, UnitOfWorkImpl)
 
         # Auth and users
-        self._app.services.add_scoped(UserDAOReader, UserDAOReaderImpl)
-        self._app.services.add_scoped(UserDAOWriter, UserDAOWriterImpl)
-        self._app.services.add_scoped(TokensStorageDAO, TokensStorageDAOImpl)
-        self._app.services.add_scoped(GetCurrentUserUseCase)
-        self._app.services.add_scoped(LoginUserUseCase)
-        self._app.services.add_scoped(LogoutUserUseCase)
+        self._app.services.add_scoped_by_factory(auth_user_service_factory)
+        self._app.services.add_scoped(UserReadGateway, UserReadGatewayImpl)
+        self._app.services.add_scoped(UserWriteGateway, UserWriteGatewayImpl)
+        self._app.services.add_scoped(TokenGateway, TokenGatewayImpl)
 
-        # self._app.services.add_exact_scoped(UserService)
-        self._app.services.add_exact_scoped(AuthUserService)
+        # Workout
+        self._app.services.add_scoped(
+            AnalysisSportsGround, AnalysisSportsGroundImpl
+        )
 
     def _setup_routes(self) -> None:
         docs = self._app.services.build_provider().get(OpenAPIHandler)
-        mediator = self._app.services.build_provider().get(MediatorProtocol)
+        mediator = self._app.services.build_provider().get(Mediator)
         controllers.setup(
             self._app.controllers_router, self._settings, docs, mediator
         )
         docs.bind_app(self._app)
 
     def _setup_security(self) -> None:
-        get_current_user_usecase = self._app.services.build_provider().get(
-            GetCurrentUserUseCase
+        mediator = self._app.services.build_provider().get(
+            Mediator
         )
         self._app.use_authentication().add(
-            AuthHandler(get_current_user_usecase)
+            AuthHandler(mediator)
         )
 
     def build(self) -> Application:
