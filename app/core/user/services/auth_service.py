@@ -2,7 +2,7 @@ import jwt
 from uuid import uuid4
 from passlib.context import CryptContext
 
-from ..entities.user import UserId
+from app.core.common.base.types import UserId
 from ..exceptions.auth import InvalidTokenException
 from ..protocols.token_gateway import SessionId
 

@@ -31,6 +31,7 @@ sklearn = "^0.0.post1"
 scikit-learn = "^1.2.0"
 celery = {extras = ["redis"], version = "^5.2.7"}
 flower = "^1.2.0"
+psycopg2 = "^2.9.5"
 
 
 [build-system]

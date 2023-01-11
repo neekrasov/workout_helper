@@ -1,8 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.user.protocols import UserReadGateway, UserWriteGateway
-from app.core.user.entities import User, UserId
 
+from app.core.common.base.types import UserId
+from app.core.user.entities import User
+from app.core.user.protocols import UserReadGateway, UserWriteGateway
 from ..gateway import BaseGateway
 
 

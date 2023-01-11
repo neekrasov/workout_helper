@@ -1,6 +1,7 @@
 from typing import Protocol
 
-from ..entities.user import User, UserId
+from app.core.common.base.types import UserId
+from ..entities.user import User
 
 
 class UserWriteGateway(Protocol):

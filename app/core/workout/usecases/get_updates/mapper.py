@@ -1,5 +1,6 @@
 from typing import List
 
+from app.core.common.base.types import GroundId
 from app.core.workout.entities import (
     SportsGround,
     Conditions,
@@ -16,13 +17,13 @@ class CalculationsToListEntityMapper:
         for item in data.items():
             grounds_list.append(
                 SportsGround(
-                    id=int(item[1]["global_id"]),
+                    id=GroundId(int(item[1]["global_id"])),
                     object_name=item[1]["ObjectName"],
                     location=Location(
                         adm_area=item[1]["AdmArea"],
                         district=item[1]["District"],
                         address=item[1]["Address"],
-                        lantitude=item[1]["latitude"],
+                        latitude=item[1]["latitude"],
                         longitude=item[1]["longitude"],
                     ),
                     contact=Contact(

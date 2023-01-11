@@ -1,7 +1,7 @@
 import uuid
 
 from app.core.common.mediator import UseCase
-from ...entities.user import UserId
+from app.core.common.base.types import UserId
 from ...protocols.user_gateway import UserReadGateway
 from ...protocols.token_gateway import TokenGateway
 from ...services.auth_service import AuthUserService

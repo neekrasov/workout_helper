@@ -2,6 +2,7 @@ from typing import Optional
 from dataclasses import dataclass, field
 
 from app.core.common.base.entity import Entity
+from app.core.common.base.types import GroundId
 
 
 @dataclass
@@ -17,7 +18,7 @@ class Conditions:
     has_music: bool
     lighting: str
     seats: int
-    paid: bool
+    paid: str
 
 
 @dataclass
@@ -25,7 +26,7 @@ class Location:
     adm_area: str
     district: str
     address: str
-    lantitude: float
+    latitude: float
     longitude: float
 
 
@@ -38,7 +39,7 @@ class Contact:
 
 @dataclass
 class SportsGround(Entity):
-    id: Optional[int] = field()
+    id: Optional[GroundId] = field()
     object_name: str
     location: Location
     contact: Contact

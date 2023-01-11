@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from app.infrastructure.persistence.sqlalchemy.models import metadata
+from app.infrastructure.persistence.sqlalchemy import models
 from app.settings import Settings
 
 settings = Settings()
@@ -16,7 +16,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = metadata
+target_metadata = models.mapper_registry.metadata
 
 
 def run_migrations_offline() -> None:

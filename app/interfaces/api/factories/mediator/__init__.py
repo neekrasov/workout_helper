@@ -17,6 +17,6 @@ def mediator_factory(services: GetServiceContext) -> Mediator:
     redis = services.provider.get(Redis)
 
     user_mediator_bind(mediator, session, uow, redis, services)
-    grounds_mediator_bind(mediator, services)
+    grounds_mediator_bind(mediator, services, uow, session)
 
     return mediator

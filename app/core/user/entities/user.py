@@ -1,10 +1,9 @@
 import uuid
-from typing import NewType, Optional
+from typing import Optional
 from dataclasses import dataclass, field
 
 from app.core.common.base.entity import Entity
-
-UserId = NewType("UserId", uuid.UUID)
+from app.core.common.base.types import UserId
 
 
 @dataclass

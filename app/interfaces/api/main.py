@@ -4,20 +4,26 @@ from blacksheep.server.openapi.v3 import OpenAPIHandler
 from app.settings import Settings
 from app.core.common.base.uow import UnitOfWork
 from app.core.common.mediator import Mediator
-from app.infrastructure.persistence.sqlalchemy.mapping import start_mappers
-from app.infrastructure.persistence.sqlalchemy.uow import UnitOfWorkImpl
-from app.infrastructure.persistence.redis.token_gateway import TokenGatewayImpl
-from app.infrastructure.persistence.sqlalchemy.gateways import (
-    UserWriteGatewayImpl,
-    UserReadGatewayImpl,
-)
 from app.core.user.protocols.token_gateway import TokenGateway
+from app.core.workout.protocols.analysis import AnalysisSportsGround
+from app.core.workout.protocols.grounds_gateway import (
+    GroundWriteGateway,
+    GroundReadGateway,
+)
 from app.core.user.protocols.user_gateway import (
     UserWriteGateway,
     UserReadGateway
 )
-from app.core.workout.protocols.analysis import AnalysisSportsGround
+from app.infrastructure.persistence.sqlalchemy.models import start_mappers
+from app.infrastructure.persistence.sqlalchemy.uow import UnitOfWorkImpl
+from app.infrastructure.persistence.redis.token_gateway import TokenGatewayImpl
 from app.infrastructure.worker.analysis import AnalysisSportsGroundImpl
+from app.infrastructure.persistence.sqlalchemy.gateways import (
+    UserWriteGatewayImpl,
+    UserReadGatewayImpl,
+    GroundWriteGatewayImpl,
+    GroundReadGatewayImpl,
+)
 from .factories.mediator import mediator_factory
 from .security.auth_handler import AuthHandler
 from .factories.celery import celery_factory
@@ -67,6 +73,12 @@ class ApplicationBuilder:
         # Workout
         self._app.services.add_scoped(
             AnalysisSportsGround, AnalysisSportsGroundImpl
+        )
+        self._app.services.add_scoped(
+            GroundReadGateway, GroundReadGatewayImpl
+        )
+        self._app.services.add_scoped(
+            GroundWriteGateway, GroundWriteGatewayImpl
         )
 
     def _setup_routes(self) -> None:
