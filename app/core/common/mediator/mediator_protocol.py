@@ -14,3 +14,6 @@ class Mediator(Protocol):
         handler: UseCase[Command, Any],
     ):
         ...
+
+    def send_sync(self, command: Command):
+        ...

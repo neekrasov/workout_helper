@@ -2,13 +2,17 @@ from rodi import GetServiceContext
 
 from app.core.common.mediator import MediatorImpl
 from app.core.workout.protocols.analysis import AnalysisSportsGround
-from app.core.workout.usecases.get_nearest_grounds import (
+from app.core.workout.usecases.nearest_grounds import (
     GetNearestGroundCommand,
-    GetNearestGroundHandler,
+    GetNearestGroundUseCase,
 )
 from app.core.workout.usecases.get_updates import (
     GetUpdatesCommand,
-    GetUpdatesHandler,
+    GetUpdatesUseCase,
+)
+from app.core.workout.usecases.search_grounds import (
+    SearchGroundsCommand,
+    SearchGroundsUseCase,
 )
 
 
@@ -17,5 +21,6 @@ def grounds_mediator_bind(
     services: GetServiceContext,
 ):
     analysis = services.provider.get(AnalysisSportsGround)
-    mediator.bind(GetNearestGroundCommand, GetNearestGroundHandler(analysis))
-    mediator.bind(GetUpdatesCommand, GetUpdatesHandler(analysis))
+    mediator.bind(GetNearestGroundCommand, GetNearestGroundUseCase(analysis))
+    mediator.bind(GetUpdatesCommand, GetUpdatesUseCase(analysis))
+    mediator.bind(SearchGroundsCommand, SearchGroundsUseCase(analysis))

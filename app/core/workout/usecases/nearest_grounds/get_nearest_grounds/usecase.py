@@ -4,10 +4,10 @@ from app.core.common.base.result import (
     CalculationResult
 )
 from .command import GetNearestGroundCommand
-from ...protocols.analysis import AnalysisSportsGround
+from ....protocols.analysis import AnalysisSportsGround
 
 
-class GetNearestGroundHandler(
+class GetNearestGroundUseCase(
     UseCase[
         GetNearestGroundCommand,
         CalculationResult[TaskId]
@@ -20,6 +20,6 @@ class GetNearestGroundHandler(
         self, command: GetNearestGroundCommand
     ) -> CalculationResult[TaskId]:
         grounds = self._analysis.get_nearest_sports_grounds(
-            command.latitude, command.longitude
+            command.latitude, command.longitude, command.count
         )
         return grounds

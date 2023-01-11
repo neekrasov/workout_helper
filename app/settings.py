@@ -59,6 +59,7 @@ class Settings:
     debug: bool = field(init=False)
     api_version: str = field(init=False, default="v1")
     token_expiration: int = field(init=False, default=3600)
+    dataset_path: str = field(init=False)
 
     postgres: PGSettings = field(init=False, default_factory=PGSettings)
     redis: RedisSettings = field(init=False, default_factory=RedisSettings)
@@ -75,6 +76,7 @@ class Settings:
         self.version = os.getenv("APP_VERSION")
         self.debug = os.getenv("APP_DEBUG")
         self.token_expiration = os.getenv("APP_TOKEN_EXPIRATION")
+        self.dataset_path = os.getenv("APP_DATASET_PATH")
 
     def get_dict(self):
         return asdict(self)

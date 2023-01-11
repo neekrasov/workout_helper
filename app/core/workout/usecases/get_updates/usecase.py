@@ -5,7 +5,7 @@ from .command import GetUpdatesCommand
 from .mapper import CalculationsToListEntityMapper
 
 
-class GetUpdatesHandler(UseCase[GetUpdatesCommand, UpdatesResult]):
+class GetUpdatesUseCase(UseCase[GetUpdatesCommand, UpdatesResult]):
     def __init__(self, analysis: AnalysisSportsGround) -> None:
         self._analysis = analysis
         self._mapper = CalculationsToListEntityMapper()

@@ -4,6 +4,7 @@ from app.core.common.mediator import Command
 
 
 @dataclass
-class GetNearestGroundCommand(Command):
+class CalculateNearestGroundCommand(Command):
     latitude: float
     longitude: float
+    count: int
