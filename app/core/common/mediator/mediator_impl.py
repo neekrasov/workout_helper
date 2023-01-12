@@ -10,8 +10,9 @@ class MediatorImpl(Mediator):
         self._handlers: Dict[Type[Command], UseCase] = {}
 
     async def send(self, command: Command) -> Any:
-        handler = self._handlers[type(command)]
-        if handler is None:
+        try:
+            handler = self._handlers[type(command)]
+        except KeyError:
             raise CommandNotFoundException(command)
         return await handler(command)
 
@@ -19,7 +20,8 @@ class MediatorImpl(Mediator):
         self._handlers[command] = handler
 
     def send_sync(self, command: Command) -> Any:
-        handler = self._handlers[type(command)]
-        if handler is None:
+        try:
+            handler = self._handlers[type(command)]
+        except KeyError:
             raise CommandNotFoundException(command)
         return handler(command)

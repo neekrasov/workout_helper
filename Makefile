@@ -8,13 +8,13 @@ run:
 	make -j 3 run-api run-celery run-flower
 
 run-api:
-	poetry run uvicorn app.interfaces.api.main:app --reload
+	poetry run uvicorn app.presentation.api.main:app --reload
 
 run-celery:
-	poetry run celery -A app.interfaces.celery.worker worker -l info
+	poetry run celery -A app.presentation.celery.worker worker -l info
 
 run-flower:
-	poetry run celery -A app.interfaces.celery.worker flower 
+	poetry run celery -A app.presentation.celery.worker flower 
 
 migrate-up:
 	poetry run alembic -c ./app/infrastructure/persistence/sqlalchemy/alembic.ini upgrade head
