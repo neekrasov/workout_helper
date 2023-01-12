@@ -1,9 +1,11 @@
 import abc
+import http
 from typing import Any, TypeVar, Optional, Callable
 from blacksheep.server.controllers import ApiController
 from blacksheep.server.openapi.common import EndpointDocs
 from blacksheep.server.openapi.v3 import OpenAPIHandler
 from blacksheep.server.routing import RoutesRegistry
+from guardpost.authentication import User as GuardpostUser
 
 from app.settings import Settings
 from app.core.common.mediator import Mediator
@@ -52,3 +54,12 @@ class BaseController(ApiController):
         controller_type = self.__class__
         setattr(handler, "controller_type", controller_type)
         return handler
+
+    def _check_user_auth(self, user: GuardpostUser):
+        if not user:
+            return self.pretty_json(
+                status=http.HTTPStatus.UNAUTHORIZED,
+                data={
+                    "detail": "User is not authorized",
+                },
+            )

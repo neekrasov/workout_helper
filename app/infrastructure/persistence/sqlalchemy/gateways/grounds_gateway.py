@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import select
+from sqlalchemy import select, exists
 
 from app.core.common.base.types import GroundId
 from app.core.workout.protocols.grounds_gateway import (
@@ -16,6 +16,15 @@ class GroundReadGatewayImpl(BaseGateway, GroundReadGateway):
             select(SportsGround).where(SportsGround.id == ground_id)
         )
         return ground.scalar_one_or_none()
+
+    async def check_user_like(self, liked_ground: LikedGround) -> bool:
+        result = await self._session.execute(
+            select(exists().where(
+                LikedGround.user_id == liked_ground.user_id,
+                LikedGround.ground_id == liked_ground.ground_id,
+            ))
+        )
+        return result.scalar()
 
 
 class GroundWriteGatewayImpl(BaseGateway, GroundWriteGateway):

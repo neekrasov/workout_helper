@@ -5,6 +5,7 @@ from app.settings import Settings
 from .tasks import (
     get_nearest_grounds,
     search_grounds,
+    get_recommendations,
 )
 from .factories import build_mediator
 
@@ -23,9 +24,13 @@ def build_celery() -> Celery:
     search_grounds_task = _inject_dependency_to_task(
         search_grounds, mediator=mediator
     )
+    get_recommendations_task = _inject_dependency_to_task(
+        get_recommendations, mediator=mediator
+    )
 
     app.task(get_nearest_grounds_task, name="get_nearest_grounds")
     app.task(search_grounds_task, name="search_grounds")
+    app.task(get_recommendations_task, name="get_recommendations")
     return app
 
 

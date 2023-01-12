@@ -2,6 +2,7 @@ from celery import Celery, states
 from celery.result import AsyncResult
 
 from app.core.common.base.result import TaskId, ResultStatus, CalculationResult
+from app.core.common.base.types import GroundId
 from app.core.workout.protocols.analysis import (
     AnalysisSportsGround,
     UpdatesResult,
@@ -36,5 +37,13 @@ class AnalysisSportsGroundImpl(AnalysisSportsGround):
     ) -> CalculationResult[TaskId]:
         task: AsyncResult = self._celery.send_task(
             name="search_grounds", args=(search_query, count)
+        )
+        return CalculationResult(status=ResultStatus.PENDING, data=task.id)
+
+    def get_recommendations(
+        self, ground_id: GroundId, count: int
+    ) -> CalculationResult[TaskId]:
+        task: AsyncResult = self._celery.send_task(
+            name="get_recommendations", args=(int(ground_id), count)
         )
         return CalculationResult(status=ResultStatus.PENDING, data=task.id)

@@ -6,7 +6,11 @@ from guardpost.authentication import User as GuardpostUser
 
 from app.core.common.base.result import TaskId
 from app.core.common.base.types import UserId, GroundId
-from app.core.workout.exceptions.grounds import GroundsNotFoundException
+from app.core.workout.exceptions.grounds import (
+    GroundsNotFoundException,
+    UserDoesNotLikeGroundException,
+    UserAlreadyLikedGroundException,
+)
 from app.core.workout.usecases.get_updates import GetUpdatesCommand
 from app.core.workout.usecases.nearest_grounds import (
     GetNearestGroundCommand,
@@ -18,6 +22,7 @@ from ..models.grounds import (
     SearchGroundsRequest,
 )
 from app.core.workout.usecases.like_ground import LikeGroundCommand
+from app.core.workout.usecases.recommendations import GetRecommendationsCommand
 
 
 class GroundsController(BaseController):
@@ -62,13 +67,7 @@ class GroundsController(BaseController):
         )
 
     async def like_ground(self, ground_id: int, user: GuardpostUser):
-        if not user:
-            return self.pretty_json(
-                status=http.HTTPStatus.UNAUTHORIZED,
-                data={
-                    "detail": "User is not authorized",
-                }
-            )
+        self._check_user_auth(user)
         try:
             await self._mediator.send(
                 LikeGroundCommand(
@@ -81,13 +80,47 @@ class GroundsController(BaseController):
                 status=http.HTTPStatus.NOT_FOUND,
                 data={
                     "detail": "Grounds not found",
-                }
+                },
+            )
+        except UserAlreadyLikedGroundException:
+            return self.pretty_json(
+                status=http.HTTPStatus.CONFLICT,
+                data={
+                    "detail": "User already liked this ground",
+                },
             )
         return self.pretty_json(
             status=http.HTTPStatus.OK,
             data={
                 "detail": f"Ground liked by user {user.id}",
             },
+        )
+
+    async def get_recommendations(
+        self,
+        ground_id: FromQuery[int],
+        user: GuardpostUser,
+        count: FromQuery[int],
+    ):
+        self._check_user_auth(user)
+        try:
+            result = await self._mediator.send(
+                GetRecommendationsCommand(
+                    ground_id=GroundId(ground_id.value),
+                    user_id=UserId(uuid.UUID(str(user.id))),
+                    count=count.value,
+                )
+            )
+        except UserDoesNotLikeGroundException:
+            return self.pretty_json(
+                status=http.HTTPStatus.NOT_FOUND,
+                data={
+                    "detail": "User does not like this ground",
+                },
+            )
+        return self.pretty_json(
+            status=http.HTTPStatus.OK,
+            data=result,
         )
 
     async def get_updates(
@@ -125,4 +158,9 @@ class GroundsController(BaseController):
             method="POST",
             path="/like",
             controller_method=self.like_ground,
+        )
+        self.add_route(
+            method="POST",
+            path="/recommendations",
+            controller_method=self.get_recommendations,
         )

@@ -1,12 +1,13 @@
 from app.core.common.mediator import UseCase
 from app.core.common.base.uow import UnitOfWork
+from app.core.common.base.exceptions import UniqueConstraintViolation
 from ...entities import LikedGround
 from .command import LikeGroundCommand
-from ...protocols.grounds_gateway import (
-    GroundWriteGateway,
-    GroundReadGateway
+from ...protocols.grounds_gateway import GroundWriteGateway, GroundReadGateway
+from ...exceptions.grounds import (
+    GroundsNotFoundException,
+    UserAlreadyLikedGroundException,
 )
-from ...exceptions.grounds import GroundsNotFoundException
 
 
 class LikeGroundUseCase(UseCase[LikeGroundCommand, None]):
@@ -27,8 +28,10 @@ class LikeGroundUseCase(UseCase[LikeGroundCommand, None]):
             )
             if not ground:
                 raise GroundsNotFoundException
-
-            await self._grounds_write_gateway.like_ground(
-                LikedGround(command.user_id, command.ground_id)
-            )
-            await self._uow.commit()
+            try:
+                await self._grounds_write_gateway.like_ground(
+                    LikedGround(command.user_id, command.ground_id)
+                )
+                await self._uow.commit()
+            except UniqueConstraintViolation:
+                raise UserAlreadyLikedGroundException

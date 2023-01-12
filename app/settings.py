@@ -49,6 +49,19 @@ class RedisSettings:
 
 
 @dataclass
+class DatasetSettings:
+    dataset_path: str = field(init=False)
+    recomm_cosine_sim_path: str = field(init=False)
+
+    def __post_init__(self):
+        self._read_env()
+
+    def _read_env(self):
+        self.dataset_path = os.getenv("DATASET_PATH")
+        self.recomm_cosine_sim_path = os.getenv("RECOMM_COSINE_SIM_PATH")
+
+
+@dataclass
 class Settings:
     title: str = field(init=False)
     description: str = field(init=False)
@@ -59,10 +72,12 @@ class Settings:
     debug: bool = field(init=False)
     api_version: str = field(init=False, default="v1")
     token_expiration: int = field(init=False, default=3600)
-    dataset_path: str = field(init=False)
 
     postgres: PGSettings = field(init=False, default_factory=PGSettings)
     redis: RedisSettings = field(init=False, default_factory=RedisSettings)
+    dataset: DatasetSettings = field(
+        init=False, default_factory=DatasetSettings
+    )
 
     def __post_init__(self):
         self._read_env()
@@ -77,6 +92,7 @@ class Settings:
         self.debug = os.getenv("APP_DEBUG")
         self.token_expiration = os.getenv("APP_TOKEN_EXPIRATION")
         self.dataset_path = os.getenv("APP_DATASET_PATH")
+        self.recomm_cosine_sim_path = os.getenv("APP_RECOMM_COSINE_SIM_PATH")
 
     def get_dict(self):
         return asdict(self)

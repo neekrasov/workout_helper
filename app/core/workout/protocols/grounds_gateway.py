@@ -10,5 +10,10 @@ class GroundWriteGateway(Protocol):
 
 
 class GroundReadGateway(Protocol):
+    async def check_user_like(
+        self, liked_ground: LikedGround
+    ) -> bool:
+        ...
+
     async def get_ground(self, ground_id: GroundId) -> Optional[SportsGround]:
         ...
