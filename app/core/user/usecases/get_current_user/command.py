@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from app.core.common.mediator import Command
-from app.core.user.protocols.token_gateway import SessionId
+from app.core.common.base.types import SessionId
 
 
 @dataclass

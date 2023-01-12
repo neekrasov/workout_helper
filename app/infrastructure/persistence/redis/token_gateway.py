@@ -1,10 +1,8 @@
 from typing import Optional
 from redis.asyncio import Redis
 
-from app.core.user.protocols.token_gateway import (
-    SessionId,
-    TokenGateway,
-)
+from app.core.common.base.types import SessionId
+from app.core.user.protocols.token_gateway import TokenGateway
 
 
 class TokenGatewayImpl(TokenGateway):

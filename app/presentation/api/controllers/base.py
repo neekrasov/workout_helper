@@ -63,3 +63,6 @@ class BaseController(ApiController):
                     "detail": "User is not authorized",
                 },
             )
+
+    def _make_detail(self, detail: str) -> dict:
+        return {"detail": detail}

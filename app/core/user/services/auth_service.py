@@ -3,8 +3,8 @@ from uuid import uuid4
 from passlib.context import CryptContext
 
 from app.core.common.base.types import UserId
+from app.core.common.base.types import SessionId
 from ..exceptions.auth import InvalidTokenException
-from ..protocols.token_gateway import SessionId
 
 
 class AuthUserService:

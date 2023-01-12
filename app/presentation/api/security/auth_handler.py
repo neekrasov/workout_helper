@@ -10,7 +10,7 @@ from app.core.common.mediator import Mediator
 from app.core.user.usecases.get_current_user import (
     GetCurrentUserCommand,
 )
-from app.core.user.protocols.token_gateway import SessionId
+from app.core.common.base.types import SessionId
 from app.core.user.exceptions.auth import SessionNotFoundException
 
 

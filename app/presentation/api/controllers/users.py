@@ -7,6 +7,7 @@ from app.core.user.exceptions.users import UserAlreadyExistsException
 from app.core.user.usecases.create_user import CreateUserCommand
 from .base import BaseController
 from ..models.user import UserCreateRequest
+from app.resources import strings
 
 
 class UsersController(BaseController):
@@ -27,24 +28,18 @@ class UsersController(BaseController):
         except UserAlreadyExistsException:
             return self.pretty_json(
                 status=http.HTTPStatus.CONFLICT,
-                data={
-                    "detail": "User already exists",
-                },
+                data=self._make_detail(strings.USER_AREADY_EXISTS),
             )
         return self.pretty_json(
             status=http.HTTPStatus.CREATED,
-            data={
-                "detail": "User created",
-            },
+            data=self._make_detail(strings.USER_CREATED),
         )
 
     async def get_current(self, user: GuardpostUser):
         if user is None:
             return self.pretty_json(
                 status=http.HTTPStatus.UNAUTHORIZED,
-                data={
-                    "detail": "Not authenticated",
-                },
+                data=self._make_detail(strings.NOT_AUTHENTICATED),
             )
         return self.pretty_json(
             status=http.HTTPStatus.OK,

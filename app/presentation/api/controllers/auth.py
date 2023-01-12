@@ -2,12 +2,14 @@ import http
 import uuid
 from blacksheep import FromForm, FromQuery
 
+from app.core.common.base.types import SessionId
 from app.core.user.usecases.login_user import LoginUserCommand
 from app.core.user.usecases.logout_user import LogoutUserCommand
 from app.core.user.exceptions.auth import (
     SessionNotFoundException,
     InvalidCredentialsException,
 )
+from app.resources import strings
 from .base import BaseController
 from ..models.auth import LoginFormInputRequest
 
@@ -28,7 +30,7 @@ class AuthController(BaseController):
         except InvalidCredentialsException:
             return self.pretty_json(
                 status=http.HTTPStatus.UNAUTHORIZED,
-                data={"detail": "Invalid credentials"},
+                data=self._make_detail(strings.INVALID_CREDENTIALS),
             )
         return self.json({"session_id": session_id})
 
@@ -38,16 +40,16 @@ class AuthController(BaseController):
     ):
         try:
             user_id = await self._mediator.send(
-                LogoutUserCommand(session_id.value)
+                LogoutUserCommand(SessionId(session_id.value))
             )
         except SessionNotFoundException:
             return self.pretty_json(
                 status=http.HTTPStatus.NOT_FOUND,
-                data={"detail": "Session not found"},
+                data=self._make_detail(strings.SESSION_NOT_FOUND),
             )
         return self.pretty_json(
             status=http.HTTPStatus.ACCEPTED,
-            data={"detail": f"User {user_id} logged out"},
+            data=self._make_detail(f"User {user_id} logged out"),
         )
 
     @classmethod

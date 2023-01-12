@@ -1,7 +1,6 @@
-import uuid
-from typing import Protocol, Optional, NewType
+from typing import Protocol, Optional
 
-SessionId = NewType("SessionId", uuid.UUID)
+from app.core.common.base.types import SessionId
 
 
 class TokenGateway(Protocol):

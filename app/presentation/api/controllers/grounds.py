@@ -23,6 +23,10 @@ from ..models.grounds import (
 )
 from app.core.workout.usecases.like_ground import LikeGroundCommand
 from app.core.workout.usecases.recommendations import GetRecommendationsCommand
+from app.core.workout.usecases.delete_like_ground import (
+    DeleteLikeGroundCommand,
+)
+from app.resources import strings
 
 
 class GroundsController(BaseController):
@@ -43,9 +47,7 @@ class GroundsController(BaseController):
         except GroundsNotFoundException:
             return self.pretty_json(
                 status=http.HTTPStatus.NOT_FOUND,
-                data={
-                    "detail": "Grounds not found",
-                },
+                data=self._make_detail(strings.GROUNDS_NOT_FOUND),
             )
         return self.pretty_json(
             status=http.HTTPStatus.OK,
@@ -78,22 +80,35 @@ class GroundsController(BaseController):
         except GroundsNotFoundException:
             return self.pretty_json(
                 status=http.HTTPStatus.NOT_FOUND,
-                data={
-                    "detail": "Grounds not found",
-                },
+                data=self._make_detail(strings.GROUNDS_NOT_FOUND),
             )
         except UserAlreadyLikedGroundException:
             return self.pretty_json(
                 status=http.HTTPStatus.CONFLICT,
-                data={
-                    "detail": "User already liked this ground",
-                },
+                data=self._make_detail(strings.USER_ALREADY_LIKED_GROUND),
             )
         return self.pretty_json(
             status=http.HTTPStatus.OK,
-            data={
-                "detail": f"Ground liked by user {user.id}",
-            },
+            data=self._make_detail(f"Ground liked by user {user.id}"),
+        )
+
+    async def delete_like_ground(self, ground_id: int, user: GuardpostUser):
+        self._check_user_auth(user)
+        try:
+            await self._mediator.send(
+                DeleteLikeGroundCommand(
+                    ground_id=GroundId(ground_id),
+                    user_id=UserId(uuid.UUID(str(user.id))),
+                )
+            )
+        except UserDoesNotLikeGroundException:
+            return self.pretty_json(
+                status=http.HTTPStatus.NOT_FOUND,
+                data=self._make_detail(strings.USER_DOES_NOT_LIKE_GROUND),
+            )
+        return self.pretty_json(
+            status=http.HTTPStatus.OK,
+            data=self._make_detail(f"Ground unliked by user {user.id}"),
         )
 
     async def get_recommendations(
@@ -114,9 +129,7 @@ class GroundsController(BaseController):
         except UserDoesNotLikeGroundException:
             return self.pretty_json(
                 status=http.HTTPStatus.NOT_FOUND,
-                data={
-                    "detail": "User does not like this ground",
-                },
+                data=self._make_detail(strings.USER_DOES_NOT_LIKE_GROUND),
             )
         return self.pretty_json(
             status=http.HTTPStatus.OK,
@@ -160,7 +173,7 @@ class GroundsController(BaseController):
             controller_method=self.like_ground,
         )
         self.add_route(
-            method="POST",
+            method="GET",
             path="/recommendations",
             controller_method=self.get_recommendations,
         )
