@@ -3,12 +3,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class CoordinatesGroundRequest:
-    latitude: float
-    longitude: float
-
-
-@dataclass
 class SearchGroundsRequest:
     object_name: Optional[str] = None
     adm_area: Optional[str] = None

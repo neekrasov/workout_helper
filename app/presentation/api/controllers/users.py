@@ -1,7 +1,12 @@
 import http
 from blacksheep import FromJSON
 from guardpost.authentication import User as GuardpostUser
-
+from blacksheep.server.openapi.common import (
+    EndpointDocs,
+    ResponseInfo,
+    ContentInfo,
+)
+from app.core.user.entities.user import User
 from app.core.user.services.auth_service import AuthUserService
 from app.core.user.exceptions.users import UserAlreadyExistsException
 from app.core.user.usecases.create_user import CreateUserCommand
@@ -59,9 +64,29 @@ class UsersController(BaseController):
             method="POST",
             path="/",
             controller_method=self.create,
+            doc=EndpointDocs(
+                description="Create a new user",
+                responses={
+                    201: ResponseInfo(strings.USER_CREATED),
+                    409: ResponseInfo(strings.USER_AREADY_EXISTS),
+                },
+            ),
         )
         self.add_route(
             method="GET",
             path="/me",
             controller_method=self.get_current,
+            doc=EndpointDocs(
+                description="Get current user",
+                responses={
+                    200: ResponseInfo(
+                        description="Current user",
+                        content=[
+                            ContentInfo(
+                                type=User
+                            )
+                        ]
+                    )
+                }
+            )
         )

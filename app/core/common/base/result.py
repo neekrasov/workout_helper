@@ -6,6 +6,12 @@ T = TypeVar("T")
 TaskId = NewType("TaskId", str)
 
 
+class ResultType(Enum):
+    ID = "ID"
+    DATA = "DATA"
+    NAN = "NAN"
+
+
 class ResultStatus(Enum):
     PENDING = "PENDING"
     SUCCESS = "SUCCESS"
@@ -14,5 +20,6 @@ class ResultStatus(Enum):
 
 @dataclass
 class CalculationResult(Generic[T]):
+    type: ResultType
     status: ResultStatus
     data: T

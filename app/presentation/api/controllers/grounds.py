@@ -1,11 +1,29 @@
 import http
 import uuid
+from typing import List
 from dataclasses import asdict
 from blacksheep import FromJSON, FromQuery
 from guardpost.authentication import User as GuardpostUser
+from blacksheep.server.openapi.common import (
+    EndpointDocs,
+    ResponseInfo,
+    ContentInfo,
+    ParameterInfo,
+)
 
-from app.core.common.base.result import TaskId
+from app.core.common.base.result import (
+    TaskId,
+    CalculationResult,
+    ResultStatus,
+    ResultType,
+)
 from app.core.common.base.types import UserId, GroundId
+from app.core.workout.entities.sports_ground import (
+    SportsGround,
+    Location,
+    Contact,
+    Conditions,
+)
 from app.core.workout.exceptions.grounds import (
     GroundsNotFoundException,
     UserDoesNotLikeGroundException,
@@ -16,11 +34,6 @@ from app.core.workout.usecases.nearest_grounds import (
     GetNearestGroundCommand,
 )
 from app.core.workout.usecases.search_grounds import SearchGroundsCommand
-from .base import BaseController
-from ..models.grounds import (
-    CoordinatesGroundRequest,
-    SearchGroundsRequest,
-)
 from app.core.workout.usecases.like_ground import LikeGroundCommand
 from app.core.workout.usecases.recommendations import GetRecommendationsCommand
 from app.core.workout.usecases.delete_like_ground import (
@@ -28,20 +41,22 @@ from app.core.workout.usecases.delete_like_ground import (
 )
 from app.core.workout.usecases.user_grounds import GetUserGroundsCommand
 from app.resources import strings
+from .base import BaseController
+from ..models.grounds import SearchGroundsRequest
 
 
 class GroundsController(BaseController):
     async def get_nearest(
         self,
-        coordinates: FromJSON[CoordinatesGroundRequest],
+        latitude: FromQuery[float],
+        longitude: FromQuery[float],
         count: FromQuery[int],
     ):
-        coordinates_value = coordinates.value
         try:
             result = await self._mediator.send(
                 GetNearestGroundCommand(
-                    latitude=coordinates_value.latitude,
-                    longitude=coordinates_value.longitude,
+                    latitude=latitude.value,
+                    longitude=longitude.value,
                     count=count.value,
                 )
             )
@@ -172,37 +187,243 @@ class GroundsController(BaseController):
 
     def register(self) -> None:
         self.add_route(
-            method="POST",
+            method="GET",
             path="/nearest",
             controller_method=self.get_nearest,
+            doc=EndpointDocs(
+                description=(
+                    "Get the nearest sports grounds by latitude and longitude."
+                ),
+                parameters={
+                    "latitude": ParameterInfo(
+                        description="Latitude of the point.",
+                        example="55.753215",
+                    ),
+                    "longitude": ParameterInfo(
+                        description="Longitude of the point.",
+                        example="37.622504",
+                    ),
+                    "count": ParameterInfo(
+                        description="Number of grounds to return.",
+                        example="5",
+                    ),
+                },
+                responses={
+                    200: ResponseInfo(
+                        description="Task ID to get updates.",
+                        content=[
+                            ContentInfo(
+                                type=CalculationResult[TaskId],
+                                examples=[
+                                    CalculationResult(
+                                        type=ResultType.ID,
+                                        status=ResultStatus.SUCCESS,
+                                        data=TaskId("92a877b1-b657-4d0e-a749-9f4f244fdca2"), # noqa,
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                    404: ResponseInfo(strings.GROUNDS_NOT_FOUND),
+                },
+            ),
         )
         self.add_route(
             method="GET",
             path="/get-updates/{task_id}",
             controller_method=self.get_updates,
+            doc=EndpointDocs(
+                description="Get updates for the calculation tasks.",
+                parameters={
+                    "task_id": ParameterInfo(
+                        description="Task ID to get updates.",
+                        example="92a877b1-b657-4d0e-a749-9f4f244fdca2",
+                    ),
+                },
+                responses={
+                    200: ResponseInfo(
+                        description="Object with the calculation result.",
+                        content=[
+                            ContentInfo(
+                                type=CalculationResult[List[SportsGround]],
+                                examples=[
+                                    CalculationResult(
+                                        type=ResultType.ID,
+                                        status=ResultStatus.SUCCESS,
+                                        data=[
+                                            SportsGround(
+                                                id=GroundId(406671453),
+                                                object_name="object_name",
+                                                location=Location(
+                                                    adm_area="adm_area",
+                                                    district="district",
+                                                    address="address",
+                                                    latitude=55.753215,
+                                                    longitude=37.622504,
+                                                ),
+                                                contact=Contact(
+                                                    email="email",
+                                                    website="website",
+                                                    phone="phone",
+                                                ),
+                                                conditions=Conditions(
+                                                    has_equipment_rental=True,
+                                                    has_tech_service=True,
+                                                    has_dressing_room=True,
+                                                    has_eatery=True,
+                                                    has_toilet=True,
+                                                    has_wifi=True,
+                                                    has_cash_machine=True,
+                                                    has_first_aid_post=True,
+                                                    has_music=True,
+                                                    lighting="смешанное",
+                                                    seats=50,
+                                                    paid="бесплатно",
+                                                ),
+                                            )
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                    404: ResponseInfo(strings.GROUNDS_NOT_FOUND),
+                },
+            ),
         )
         self.add_route(
             method="POST",
             path="/search",
             controller_method=self.search_grounds,
+            doc=EndpointDocs(
+                description="Search sports grounds by the given criteria.",
+                parameters={
+                    "count": ParameterInfo(
+                        description="Number of grounds to return.",
+                        example="5",
+                    ),
+                },
+                responses={
+                    200: ResponseInfo(
+                        description="Task ID to get updates.",
+                        content=[
+                            ContentInfo(
+                                type=CalculationResult[TaskId],
+                                examples=[
+                                    CalculationResult(
+                                        type=ResultType.ID,
+                                        status=ResultStatus.SUCCESS,
+                                        data=TaskId("92a877b1-b657-4d0e-a749-9f4f244fdca2"), # noqa
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                },
+            ),
         )
         self.add_route(
             method="POST",
             path="/like",
             controller_method=self.like_ground,
+            doc=EndpointDocs(
+                description="Like sports ground.",
+                parameters={
+                    "ground_id": ParameterInfo(
+                        description="Ground ID to like.",
+                        example="406671453",
+                    ),
+                },
+                responses={
+                    200: ResponseInfo(
+                        description="Task ID to get updates.",
+                        content=[
+                            ContentInfo(
+                                type=CalculationResult[TaskId],
+                                examples=[
+                                    CalculationResult(
+                                        type=ResultType.ID,
+                                        status=ResultStatus.SUCCESS,
+                                        data=TaskId("92a877b1-b657-4d0e-a749-9f4f244fdca2"), # noqa
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                },
+            ),
         )
         self.add_route(
             method="GET",
             path="/recommendations",
             controller_method=self.get_recommendations,
+            doc=EndpointDocs(
+                description="Get recommendations for the user.",
+                parameters={
+                    "ground_id": ParameterInfo(
+                        description="Ground ID to like.",
+                        example="406671453",
+                    ),
+                    "count": ParameterInfo(
+                        required=False,
+                        description="Number of grounds to return.",
+                        example="5",
+                    ),
+                },
+                responses={
+                    200: ResponseInfo(
+                        description="Task ID to get updates.",
+                        content=[
+                            ContentInfo(
+                                type=CalculationResult[TaskId],
+                                examples=[
+                                    CalculationResult(
+                                        type=ResultType.ID,
+                                        status=ResultStatus.SUCCESS,
+                                        data=TaskId("92a877b1-b657-4d0e-a749-9f4f244fdca2"), # noqa
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                },
+            ),
         )
         self.add_route(
             method="DELETE",
             path="/like",
             controller_method=self.delete_like_ground,
+            doc=EndpointDocs(
+                description="Delete like for sports ground.",
+                parameters={
+                    "ground_id": ParameterInfo(
+                        description="Ground ID to delete like.",
+                        example="406671453",
+                    ),
+                },
+                responses={
+                    200: ResponseInfo(
+                        "Ground unliked by user 35868fa8-e98a-48e8-9507-8c8422c957fd" # noqa
+                    ),
+                    404: ResponseInfo(strings.USER_DOES_NOT_LIKE_GROUND),
+                },
+            ),
         )
         self.add_route(
             method="GET",
             path="my",
             controller_method=self.get_user_grounds,
+            doc=EndpointDocs(
+                description="Get user-favorite sports grounds",
+                responses={
+                    200: ResponseInfo(
+                        description="List of user's liked grounds.",
+                        content=[
+                            ContentInfo(
+                                type=List[SportsGround],
+                            ),
+                        ],
+                    ),
+                },
+            ),
         )

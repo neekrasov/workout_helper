@@ -1,5 +1,4 @@
 from app.core.common.mediator import UseCase
-
 from ...protocols.analysis import AnalysisSportsGround, UpdatesResult
 from .command import GetUpdatesCommand
 from .mapper import CalculationsToListEntityMapper

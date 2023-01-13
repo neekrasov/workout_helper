@@ -1,6 +1,13 @@
 import http
 import uuid
 from blacksheep import FromForm, FromQuery
+from blacksheep.server.openapi.common import (
+    EndpointDocs,
+    ResponseInfo,
+    ContentInfo,
+    ParameterInfo,
+    RequestBodyInfo,
+)
 
 from app.core.common.base.types import SessionId
 from app.core.user.usecases.login_user import LoginUserCommand
@@ -65,9 +72,42 @@ class AuthController(BaseController):
             method="POST",
             path="/login",
             controller_method=self.login,
+            doc=EndpointDocs(
+                description="Login user",
+                request_body=RequestBodyInfo(
+                    description="Login form",
+                ),
+                responses={
+                    401: ResponseInfo(strings.INVALID_CREDENTIALS),
+                    200: ResponseInfo(
+                        description="Session id",
+                        content=[
+                            ContentInfo(
+                                type=dict,
+                                examples=[
+                                    {"session_id": "d42f838e-269e-4236-8b65-36e3df10b78b"}, # noqa
+                                ],
+                            )
+                        ],
+                    ),
+                },
+            ),
         )
         self.add_route(
             method="POST",
             path="/logout",
             controller_method=self.logout,
+            doc=EndpointDocs(
+                description="Logout user",
+                parameters={
+                    "session_id": ParameterInfo(
+                        description="Session id",
+                        example="d42f838e-269e-4236-8b65-36e3df10b78b",
+                    )
+                },
+                responses={
+                    404: ResponseInfo(strings.SESSION_NOT_FOUND),
+                    202: ResponseInfo("User 35868fa8-e98a-48e8-9507-8c8422c957fd logged out"), # noqa
+                },
+            ),
         )
