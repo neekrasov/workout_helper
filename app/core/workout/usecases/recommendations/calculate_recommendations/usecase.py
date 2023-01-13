@@ -33,7 +33,7 @@ class CalculateRecommendationsUseCase(
     def _get_index_by_id(
         self, data: pd.DataFrame, id_: GroundId
     ) -> pd.DataFrame:
-        return data[data.global_id == id_].index.values[0]
+        return data[data.id == id_].index.values[0]
 
     def __call__(self, *args, **kwargs):
         return self.handle(*args, **kwargs)

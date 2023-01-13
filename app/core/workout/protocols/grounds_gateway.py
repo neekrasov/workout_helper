@@ -1,6 +1,6 @@
-from typing import Protocol, Optional
+from typing import Protocol, Optional, List
 
-from app.core.common.base.types import GroundId
+from app.core.common.base.types import GroundId, UserId
 from ..entities import SportsGround, LikedGround
 
 
@@ -17,4 +17,9 @@ class GroundReadGateway(Protocol):
         ...
 
     async def get_ground(self, ground_id: GroundId) -> Optional[SportsGround]:
+        ...
+
+    async def get_user_grounds(
+        self, user_id: UserId
+    ) -> Optional[List[SportsGround]]:
         ...

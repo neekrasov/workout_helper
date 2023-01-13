@@ -26,6 +26,7 @@ from app.core.workout.usecases.recommendations import GetRecommendationsCommand
 from app.core.workout.usecases.delete_like_ground import (
     DeleteLikeGroundCommand,
 )
+from app.core.workout.usecases.user_grounds import GetUserGroundsCommand
 from app.resources import strings
 
 
@@ -136,6 +137,24 @@ class GroundsController(BaseController):
             data=result,
         )
 
+    async def get_user_grounds(self, user: GuardpostUser):
+        self._check_user_auth(user)
+        try:
+            result = await self._mediator.send(
+                GetUserGroundsCommand(
+                    user_id=UserId(uuid.UUID(str(user.id))),
+                )
+            )
+        except GroundsNotFoundException:
+            return self.pretty_json(
+                status=http.HTTPStatus.NOT_FOUND,
+                data=self._make_detail(strings.GROUNDS_NOT_FOUND),
+            )
+        return self.pretty_json(
+            status=http.HTTPStatus.OK,
+            data=result,
+        )
+
     async def get_updates(
         self,
         task_id: str,
@@ -176,4 +195,14 @@ class GroundsController(BaseController):
             method="GET",
             path="/recommendations",
             controller_method=self.get_recommendations,
+        )
+        self.add_route(
+            method="DELETE",
+            path="/like",
+            controller_method=self.delete_like_ground,
+        )
+        self.add_route(
+            method="GET",
+            path="my",
+            controller_method=self.get_user_grounds,
         )

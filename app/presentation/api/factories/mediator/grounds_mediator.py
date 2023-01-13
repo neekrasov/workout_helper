@@ -28,6 +28,14 @@ from app.core.workout.usecases.recommendations import (
     GetRecommendationsCommand,
     GetRecommendationsUseCase,
 )
+from app.core.workout.usecases.user_grounds import (
+    GetUserGroundsCommand,
+    GetUserGroundsUseCase,
+)
+from app.core.workout.usecases.delete_like_ground import (
+    DeleteLikeGroundCommand,
+    DeleteLikeGroundUseCase,
+)
 
 
 def grounds_mediator_bind(
@@ -50,5 +58,14 @@ def grounds_mediator_bind(
     )
     mediator.bind(
         GetRecommendationsCommand,
-        GetRecommendationsUseCase(analysis, grounds_read_gateway, uow)
+        GetRecommendationsUseCase(analysis, grounds_read_gateway, uow),
+    )
+    mediator.bind(
+        GetUserGroundsCommand, GetUserGroundsUseCase(uow, grounds_read_gateway)
+    )
+    mediator.bind(
+        DeleteLikeGroundCommand,
+        DeleteLikeGroundUseCase(
+            uow, grounds_write_gateway, grounds_read_gateway
+        ),
     )

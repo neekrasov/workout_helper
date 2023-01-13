@@ -29,7 +29,8 @@ class DeleteLikeGroundUseCase(UseCase[DeleteLikeGroundCommand, None]):
             like = await self._grounds_read_gateway.check_user_like(
                 liked_ground
             )
-            if like is None:
+            if not like:
                 raise UserDoesNotLikeGroundException()
 
             await self._grounds_write_gateway.delete_like(liked_ground)
+            await self._uow.commit()
