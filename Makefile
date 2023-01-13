@@ -4,6 +4,9 @@ endif
 
 export
 
+update-dataset:
+	poetry run python -m app.presentation.cli.update_dataset
+
 run:
 	make -j 3 run-api run-celery run-flower
 

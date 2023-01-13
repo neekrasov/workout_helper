@@ -91,7 +91,6 @@ class Settings:
         self.version = os.getenv("APP_VERSION")
         self.debug = os.getenv("APP_DEBUG")
         self.token_expiration = os.getenv("APP_TOKEN_EXPIRATION")
-        self.dataset_path = os.getenv("APP_DATASET_PATH")
         self.recomm_cosine_sim_path = os.getenv("APP_RECOMM_COSINE_SIM_PATH")
 
     def get_dict(self):

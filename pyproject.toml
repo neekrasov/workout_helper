@@ -32,6 +32,10 @@ scikit-learn = "^1.2.0"
 celery = {extras = ["redis"], version = "^5.2.7"}
 flower = "^1.2.0"
 psycopg2 = "^2.9.5"
+selenium = "^4.7.2"
+beautifulsoup4 = "^4.11.1"
+requests = "^2.28.2"
+types-requests = "^2.28.11.7"
 
 
 [build-system]
@@ -42,6 +46,6 @@ build-backend = "poetry.core.masonry.api"
 line-length = 79
 
 [tool.flake8]
-exclude = ['.git','__pycache__', '.env', 'venv']
+exclude = ['.git','__pycache__', '.env', 'venv', 'update_dataset.py']
 max-line-length = 79
 max-complexivity = 8
