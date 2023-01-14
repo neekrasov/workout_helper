@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: workout_database
+    image: postgres:14
+    volumes:
+      - workout_database_data:/var/lib/postgresql/data
+    ports:
+      - ${HOST_POSTGRES_PORT}:${POSTGRES_PORT}
+  
+  backend:
+    container_name: workout_backend
+    build:
+      context: ../
+      dockerfile: deploy/Backend.Dockerfile
+    ports:
+      - ${HOST_BACKEND_PORT}:${BACKEND_PORT}
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - ${ENV_FILE}
+  
+  redis:
+    container_name: redis
+    image: redis:7
+    expose:
+      - 6379
+    depends_on:
+      - db
+  
+  worker:
+    build:
+      context: ../
+      dockerfile: deploy/Celery.Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - ${ENV_FILE}
+  
+  flower:
+    image: mher/flower:0.9.7
+    command: ['flower', '--broker=redis://redis:6379', '--port=5555']
+    ports:
+      - 5555:5555
+    depends_on:
+      - worker
+
+volumes:
+  workout_database_data:
