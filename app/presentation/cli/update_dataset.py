@@ -5,29 +5,19 @@ import io
 import requests
 import math
 import time
+import typing as t
 import pandas as pd
+import numpy as np
 from functools import partial
 from sqlalchemy.engine import create_engine
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from app.settings import Settings
 
 
 pd.options.mode.chained_assignment = None
-
-HEADERS = {
-    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-    AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.3",
-    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
-    "accept-encoding": "gzip, deflate, br",
-    "se-ch-ua": 'Google Chrome";v="105", "Not)A;Brand";v="8", \
-    "Chromium";v="105',
-    "cache-control": "max-age=0",
-    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/ \
-    avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3; \
-    q=0.9",
-}
-URL = "https://data.mos.ru/opendata/7708308010-trenajernye-gorodki-vorkauty"
 
 
 def combine_features(row, features):
@@ -126,10 +116,8 @@ def insert_do_nothing_on_conflicts(sqltable, conn, keys, data_iter):
     conn.execute(do_nothing_stmt)
 
 
-def insert_data_to_db(data: pd.DataFrame):
-    engine = create_engine(
-        "postgresql://postgres:postgres@localhost:5432/workout"
-    )
+def insert_data_to_db(data: pd.DataFrame, postgres_url: str):
+    engine = create_engine(postgres_url)
     data.to_sql(
         "sports_grounds",
         engine,
@@ -140,15 +128,26 @@ def insert_data_to_db(data: pd.DataFrame):
 
 
 def find_zip(url: str, browser: webdriver.Chrome):
-    browser.get(URL)
-    browser.find_element("xpath", "//a[contains(., 'Скачать')]").click()
+    browser.get(url)
+    button = browser.find_element("xpath", "//a[contains(., 'Скачать')]")
+    button.click()
 
 
-def download_zip(browser: webdriver.Chrome) -> io.BytesIO:
+def download_zip(browser: webdriver.Chrome) -> t.Optional[io.BytesIO]:
     soup = bs4.BeautifulSoup(browser.page_source, "html.parser")
-    link = soup.find("div", id="dropDownloads").find_all("a")[0].get("href")
+    try:
+        link = (
+            soup.find("div", id="dropDownloads").find_all("a")[0].get("href")
+        )
+    except IndexError:
+        return None
+
     https_link = "https:" + link
     zip = requests.get(https_link)
+
+    if zip.status_code != 200:
+        return None
+
     bytes = io.BytesIO(zip.content)
     return bytes
 
@@ -165,21 +164,50 @@ def get_dataframe_from_bytes(file, encoding="Windows-1251") -> pd.DataFrame:
     return data
 
 
+def calculate_cosine_sim(data: pd.DataFrame) -> np.ndarray:
+    cv = CountVectorizer()
+    count_matrix = cv.fit_transform(data["combined_features"])
+    cosine_sim = cosine_similarity(
+        count_matrix
+    )  # бинарная мера сходства объектов
+    return cosine_sim
+
+
+def save_cosine_sim_to_csv(cosine_sim: np.ndarray, path: str):
+    np.savetxt(path, cosine_sim, delimiter=",")
+
+
 def save_data_to_csv(data: pd.DataFrame, path: str):
     data.to_csv(path)
 
 
 def main():
-    browser = webdriver.Chrome(service=Service("/usr/bin/chromedriver"))
     settings = Settings()
+    url = settings.dataset.parse_url
     dataset_path = settings.dataset.dataset_path
-    print(dataset_path)
+    postges_url = settings.postgres.postgres_url.replace("+asyncpg", "")
+
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument("--headless")
+
+    browser = webdriver.Chrome(
+        service=Service("/usr/bin/chromedriver"), options=chrome_options
+    )
+
     print("Chrome driver is started")
     print("Getting data from URL...")
-    find_zip(URL, browser)
+    find_zip(url, browser)
     print("Downloading zip file...")
-    time.sleep(5)
+    time.sleep(10)
     bytes = download_zip(browser)
+    if bytes is None:
+        print("The service is not available, contact the administrator.")
+        return
     print("Unpacking zip file...")
     file, file_list = unpack_zip(bytes)
     print("File name: " + file_list[0].filename)
@@ -187,11 +215,18 @@ def main():
     data = get_dataframe_from_bytes(file)
     print("Processing data...")
     data = base_process_data(data)
-    print("Saving data to CSV...")
+    print("Data preview:", list(data))
+    print("Saving base processed data to CSV...")
     save_data_to_csv(data, dataset_path)
+    print("Calculating cosine similarity...")
+    cosine_sim = calculate_cosine_sim(data)
+    print("Saving cosine similarity to CSV...")
+    save_cosine_sim_to_csv(
+        cosine_sim, settings.dataset.recomm_cosine_sim_path
+    )
     data = adapt_dataset_to_db_schema(data)
     print("Inserting data to DB...")
-    insert_data_to_db(data)
+    insert_data_to_db(data, postges_url)
     print("Done!")
 
     browser.close()

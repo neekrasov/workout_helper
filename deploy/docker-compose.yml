@@ -31,6 +31,7 @@ services:
       - db
   
   worker:
+    container_name: workout_worker
     build:
       context: ../
       dockerfile: deploy/Celery.Dockerfile

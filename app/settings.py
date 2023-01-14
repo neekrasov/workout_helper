@@ -52,6 +52,7 @@ class RedisSettings:
 class DatasetSettings:
     dataset_path: str = field(init=False)
     recomm_cosine_sim_path: str = field(init=False)
+    parse_url: str = field(init=False)
 
     def __post_init__(self):
         self._read_env()
@@ -59,6 +60,7 @@ class DatasetSettings:
     def _read_env(self):
         self.dataset_path = os.getenv("DATASET_PATH")
         self.recomm_cosine_sim_path = os.getenv("RECOMM_COSINE_SIM_PATH")
+        self.parse_url = os.getenv("PARSE_URL")
 
 
 @dataclass

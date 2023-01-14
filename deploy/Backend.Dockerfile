@@ -8,12 +8,12 @@ ENV PYTHONDONTWRITEBYTECODE 1 \
 
 COPY pyproject.toml poetry.lock ./
 
-
 RUN pip install --upgrade pip
-
 RUN pip install poetry
 RUN poetry install --without dev --no-root
 
-COPY . ./
+COPY app ./app
+COPY deploy ./deploy
+COPY Makefile ./
 
 CMD make migrate-up && make run-api

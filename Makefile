@@ -46,7 +46,7 @@ compose-build:
 	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) build
 
 compose-up:
-	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) up -d
+	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) up
 
 compose-logs:
 	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) logs -f
@@ -59,3 +59,6 @@ docker-rm-volume:
 
 compose-down:
 	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) down --remove-orphans
+
+compose-update-dataset:
+	docker exec -it workout_worker make update-dataset
