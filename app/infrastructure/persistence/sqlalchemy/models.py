@@ -65,13 +65,15 @@ user_table = Table(
 )
 
 liked_grounds_table = Table(
-    "liked_groups",
+    "liked_grounds",
     mapper_registry.metadata,
     Column("user_id", UUID(as_uuid=True), primary_key=True),
     Column("ground_id", Integer, primary_key=True),
-    ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_user_id"),
+    ForeignKeyConstraint(["user_id"], ["users.id"], name="fk_user_id",
+                         ondelete="CASCADE"),
     ForeignKeyConstraint(
-        ["ground_id"], ["sports_grounds.id"], name="fk_ground_id"
+        ["ground_id"], ["sports_grounds.id"], name="fk_ground_id",
+        ondelete="CASCADE"
     ),
 )
 

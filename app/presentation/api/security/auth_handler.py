@@ -26,11 +26,14 @@ class AuthHandler(BaseAuthenticationHandler):
         if header_value:
             session_id = header_value.decode("utf-8")
             try:
-                user = await self._mediator.send(
-                    GetCurrentUserCommand(
-                        SessionId(uuid.UUID(session_id))
+                try:
+                    user = await self._mediator.send(
+                        GetCurrentUserCommand(
+                            SessionId(uuid.UUID(session_id))
+                        )
                     )
-                )
+                except ValueError:
+                    user = None
                 context.identity = cast(Identity, user)
             except SessionNotFoundException:
                 context.identity = None

@@ -41,7 +41,7 @@ def setup(
             settings=settings,
             docs=docs,
             mediator=mediator,
-        )
+        ),
     ]
     for controller in controllers:
         controller.register()

@@ -64,6 +64,23 @@ class DatasetSettings:
 
 
 @dataclass
+class TestUserSettings:
+    id: str = field(init=False)
+    username: str = field(init=False)
+    password: str = field(init=False)
+    email: str = field(init=False)
+
+    def __post_init__(self):
+        self._read_env()
+
+    def _read_env(self):
+        self.id = os.getenv("FIRST_USER_ID")
+        self.username = os.getenv("FIRST_USER_USERNAME")
+        self.password = os.getenv("FIRST_USER_PASSWORD")
+        self.email = os.getenv("FIRST_USER_EMAIL")
+
+
+@dataclass
 class Settings:
     title: str = field(init=False)
     description: str = field(init=False)
@@ -79,6 +96,9 @@ class Settings:
     redis: RedisSettings = field(init=False, default_factory=RedisSettings)
     dataset: DatasetSettings = field(
         init=False, default_factory=DatasetSettings
+    )
+    test_user: TestUserSettings = field(
+        init=False, default_factory=TestUserSettings
     )
 
     def __post_init__(self):

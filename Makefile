@@ -42,11 +42,14 @@ migrate-history:
 migrate-stamp:
 	poetry run alembic -c deploy/alembic.ini stamp $(revision)
 
+run-tests:
+	poetry run pytest -v
+
 compose-build:
 	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) build
 
 compose-up:
-	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) up
+	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) up -d
 
 compose-logs:
 	docker-compose -f ./deploy/docker-compose.yml --env-file deploy/$(ENV_FILE) logs -f

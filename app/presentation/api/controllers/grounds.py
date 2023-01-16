@@ -52,19 +52,13 @@ class GroundsController(BaseController):
         longitude: FromQuery[float],
         count: FromQuery[int],
     ):
-        try:
-            result = await self._mediator.send(
-                GetNearestGroundCommand(
-                    latitude=latitude.value,
-                    longitude=longitude.value,
-                    count=count.value,
-                )
+        result = await self._mediator.send(
+            GetNearestGroundCommand(
+                latitude=latitude.value,
+                longitude=longitude.value,
+                count=count.value,
             )
-        except GroundsNotFoundException:
-            return self.pretty_json(
-                status=http.HTTPStatus.NOT_FOUND,
-                data=self._make_detail(strings.GROUNDS_NOT_FOUND),
-            )
+        )
         return self.pretty_json(
             status=http.HTTPStatus.OK,
             data=result,
@@ -100,7 +94,7 @@ class GroundsController(BaseController):
             )
         except UserAlreadyLikedGroundException:
             return self.pretty_json(
-                status=http.HTTPStatus.CONFLICT,
+                status=http.HTTPStatus.BAD_REQUEST,
                 data=self._make_detail(strings.USER_ALREADY_LIKED_GROUND),
             )
         return self.pretty_json(
@@ -224,7 +218,6 @@ class GroundsController(BaseController):
                             ),
                         ],
                     ),
-                    404: ResponseInfo(strings.GROUNDS_NOT_FOUND),
                 },
             ),
         )

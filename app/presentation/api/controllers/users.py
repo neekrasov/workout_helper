@@ -32,7 +32,7 @@ class UsersController(BaseController):
             )
         except UserAlreadyExistsException:
             return self.pretty_json(
-                status=http.HTTPStatus.CONFLICT,
+                status=http.HTTPStatus.BAD_REQUEST,
                 data=self._make_detail(strings.USER_AREADY_EXISTS),
             )
         return self.pretty_json(

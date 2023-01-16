@@ -12,7 +12,7 @@ from app.core.workout.protocols.grounds_gateway import (
 )
 from app.core.user.protocols.user_gateway import (
     UserWriteGateway,
-    UserReadGateway
+    UserReadGateway,
 )
 from app.infrastructure.persistence.sqlalchemy.models import start_mappers
 from app.infrastructure.persistence.sqlalchemy.uow import UnitOfWorkImpl
@@ -38,6 +38,7 @@ from .factories.base import (
     auth_user_service_factory,
 )
 from . import controllers
+from .events import on_shutdown
 
 
 class ApplicationBuilder:
@@ -74,9 +75,7 @@ class ApplicationBuilder:
         self._app.services.add_scoped(
             AnalysisSportsGround, AnalysisSportsGroundImpl
         )
-        self._app.services.add_scoped(
-            GroundReadGateway, GroundReadGatewayImpl
-        )
+        self._app.services.add_scoped(GroundReadGateway, GroundReadGatewayImpl)
         self._app.services.add_scoped(
             GroundWriteGateway, GroundWriteGatewayImpl
         )
@@ -90,18 +89,18 @@ class ApplicationBuilder:
         docs.bind_app(self._app)
 
     def _setup_security(self) -> None:
-        mediator = self._app.services.build_provider().get(
-            Mediator
-        )
-        self._app.use_authentication().add(
-            AuthHandler(mediator)
-        )
+        mediator = self._app.services.build_provider().get(Mediator)
+        self._app.use_authentication().add(AuthHandler(mediator))
+
+    def _setup_events(self) -> None:
+        self._app.on_stop += on_shutdown
 
     def build(self) -> Application:
         start_mappers()
         self._setup_di()
         self._setup_routes()
         self._setup_security()
+        self._setup_events()
         return self._app
 
 
