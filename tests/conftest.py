@@ -1,14 +1,16 @@
 import asyncio
+import pytest
 import pytest_asyncio
+from rodi import Services
 from redis.asyncio import Redis
 from typing import List, Tuple
-from rodi import Services
 from blacksheep import Application
 from blacksheep.testing import TestClient
 from blacksheep.contents import FormContent
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.sql import text
 from passlib.context import CryptContext
+from celery import Celery
 
 from app.presentation.api.main import app as api_app
 from app.settings import Settings
@@ -51,6 +53,11 @@ async def engine(provider: Services):
 @pytest_asyncio.fixture(scope="session")
 async def redis_client(provider: Services):
     return provider.get(Redis)
+
+
+@pytest.fixture(scope="session")
+def celery_app(provider: Services):
+    return provider.get(Celery)
 
 
 @pytest_asyncio.fixture(scope="session")
