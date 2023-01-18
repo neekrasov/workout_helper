@@ -2,6 +2,7 @@ from app.core.user.entities.user import User
 from app.core.common.mediator import UseCase
 from app.core.common.base.uow import UnitOfWork
 from app.core.common.base.exceptions import UniqueConstraintViolation
+from ...entities.user import Username, Email, RawPassword
 from .command import CreateUserCommand
 from ...services.auth_service import AuthUserService
 from ...protocols.user_gateway import UserWriteGateway
@@ -21,10 +22,12 @@ class CreateUserUseCase(UseCase[CreateUserCommand, None]):
 
     async def handle(self, command: CreateUserCommand) -> None:
         async with self._uow.pipeline:
-            hashed_password = self._auth_service.hash_pass(command.password)
+            hashed_password = self._auth_service.hash_pass(
+                RawPassword(command.raw_password)
+            )
             user = User(
-                username=command.username,
-                email=command.email,
+                username=Username(command.username),
+                email=Email(command.email),
                 hashed_password=hashed_password,
             )
             self._user_write_gateway.create_user(user)

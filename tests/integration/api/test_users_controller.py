@@ -20,7 +20,7 @@ async def test_create_user(
             {
                 "email": email,
                 "username": "testtest",
-                "password": "testtest12345678",
+                "password": "testtTst_12345678",
             }
         ),
     )
@@ -97,3 +97,57 @@ async def test_get_current_user_errors(
     )
 
     assert response.status == 401
+
+
+@pytest.mark.asyncio
+async def test_validation_email(
+    test_client: TestClient,
+):
+    response = await test_client.post(
+        "/api/v1/users",
+        content=json_content(
+            {
+                "email": "invalid_email",
+                "username": "testtest",
+                "password": "tes1ttTst_",
+            }
+        ),
+    )
+
+    assert response.status == 403
+
+
+@pytest.mark.asyncio
+async def test_validation_password(
+    test_client: TestClient,
+):
+    response = await test_client.post(
+        "/api/v1/users",
+        content=json_content(
+            {
+                "email": "email@email.ru",
+                "username": "testtest",
+                "password": "test",
+            }
+        ),
+    )
+
+    assert response.status == 403
+
+
+@pytest.mark.asyncio
+async def test_validation_username(
+    test_client: TestClient,
+):
+    response = await test_client.post(
+        "/api/v1/users",
+        content=json_content(
+            {
+                "email": "email@email.ru",
+                "username": " ",
+                "password": "test123JKHG_",
+            }
+        ),
+    )
+
+    assert response.status == 403

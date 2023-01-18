@@ -7,4 +7,4 @@ from app.core.common.mediator import Command
 class CreateUserCommand(Command):
     username: str
     email: str
-    password: str
+    raw_password: str

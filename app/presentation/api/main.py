@@ -4,6 +4,7 @@ from blacksheep.server.openapi.v3 import OpenAPIHandler
 from app.settings import Settings
 from app.core.common.base.uow import UnitOfWork
 from app.core.common.mediator import Mediator
+from app.core.common.base.exceptions import ValidationError
 from app.core.user.protocols.token_gateway import TokenGateway
 from app.core.workout.protocols.analysis import AnalysisSportsGround
 from app.core.workout.protocols.grounds_gateway import (
@@ -95,9 +96,15 @@ class ApplicationBuilder:
     def _setup_events(self) -> None:
         self._app.on_stop += on_shutdown
 
+    def _setup_exc_handlers(self) -> None:
+        self._app.exception_handler(ValidationError)(
+            controllers.validation_error_handler
+        )
+
     def build(self) -> Application:
         start_mappers()
         self._setup_di()
+        self._setup_exc_handlers()
         self._setup_routes()
         self._setup_security()
         self._setup_events()

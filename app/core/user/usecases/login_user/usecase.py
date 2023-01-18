@@ -2,6 +2,7 @@ import uuid
 
 from app.core.common.mediator import UseCase
 from app.core.common.base.uow import UnitOfWork
+from ...entities.user import RawPassword
 from ...protocols.user_gateway import UserReadGateway
 from ...protocols.token_gateway import TokenGateway
 from ...services.auth_service import AuthUserService
@@ -34,7 +35,7 @@ class LoginUserUseCase(UseCase[LoginUserCommand, uuid.UUID]):
                 raise InvalidCredentialsException
 
             verify = self._auth_service.verify_pass(
-                command.raw_password, user.hashed_password
+                RawPassword(command.raw_password), user.hashed_password
             )
 
             if not verify:

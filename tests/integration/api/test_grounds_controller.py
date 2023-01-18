@@ -31,7 +31,6 @@ def assert_task_response(
     assert data["type"] == "ID"
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_get_nearest_grounds(test_client: TestClient):
     items_count = 1
@@ -42,7 +41,7 @@ async def test_get_nearest_grounds(test_client: TestClient):
     data = await response.json()
     assert_task_response(test_client, response, data)
 
-    await asyncio.sleep(5)
+    await asyncio.sleep(2)
 
     updates_result = await assert_updates(
         test_client, data["data"], items_count
@@ -52,7 +51,6 @@ async def test_get_nearest_grounds(test_client: TestClient):
     )
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_search_grounds(test_client: TestClient):
     items_count = 5
@@ -71,7 +69,7 @@ async def test_search_grounds(test_client: TestClient):
     search_data = await search_response.json()
     assert_task_response(test_client, search_response, search_data)
 
-    await asyncio.sleep(5)
+    await asyncio.sleep(2)
 
     updates_result = await assert_updates(
         test_client, search_data["data"], items_count
@@ -82,7 +80,6 @@ async def test_search_grounds(test_client: TestClient):
     )
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_get_recommendations(
     test_client: TestClient,
@@ -102,7 +99,7 @@ async def test_get_recommendations(
 
     assert_task_response(test_client, response, rec_data)
 
-    await asyncio.sleep(delay=5)
+    await asyncio.sleep(2)
 
     updates_result = await assert_updates(
         test_client, rec_data["data"], items_count
@@ -111,7 +108,6 @@ async def test_get_recommendations(
     assert updates_result["data"][0]["contact"]["email"] == "info@parkfili.com"
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_get_user_grounds(
     test_client: TestClient,
@@ -130,7 +126,6 @@ async def test_get_user_grounds(
     assert data[0]["id"] == 281867778
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_like_ground(
     test_client: TestClient,
@@ -161,7 +156,6 @@ async def test_like_ground(
         assert result.scalar() is True
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_delete_like_ground(
     test_client: TestClient,
@@ -193,7 +187,6 @@ async def test_delete_like_ground(
         assert result.rowcount == -1
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_like_ground_errors(
     test_client: TestClient,
@@ -216,7 +209,6 @@ async def test_like_ground_errors(
     assert response.status == 400
 
 
-@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_delete_like_errors(
     test_client: TestClient,

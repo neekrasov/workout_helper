@@ -26,7 +26,7 @@ class UsersController(BaseController):
             await self._mediator.send(
                 CreateUserCommand(
                     username=values.username,
-                    password=values.password,
+                    raw_password=values.password,
                     email=values.email,
                 )
             )

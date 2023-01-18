@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 from app.core.common.base.types import UserId
 from app.core.common.base.types import SessionId
 from ..exceptions.auth import InvalidTokenException
+from ..entities.user import RawPassword
 
 
 class AuthUserService:
@@ -40,8 +41,10 @@ class AuthUserService:
     def generate_session_id(self) -> SessionId:
         return SessionId(uuid4())
 
-    def hash_pass(self, raw_password: str) -> str:
-        return self._pwd_context.hash(raw_password)
+    def hash_pass(self, raw_password: RawPassword) -> str:
+        return self._pwd_context.hash(raw_password.value)
 
-    def verify_pass(self, raw_password: str, hashed_password: str) -> bool:
-        return self._pwd_context.verify(raw_password, hashed_password)
+    def verify_pass(
+        self, raw_password: RawPassword, hashed_password: str
+    ) -> bool:
+        return self._pwd_context.verify(raw_password.value, hashed_password)
