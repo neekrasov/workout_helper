@@ -8,7 +8,10 @@ from .info import InfoController
 from .auth import AuthController
 from .users import UsersController
 from .grounds import GroundsController
-from .exc_handlers import validation_error_handler # noqa
+from .exc_handlers import (  # noqa
+    validation_error_handler,
+    auth_error_handler,
+)
 
 
 def setup(

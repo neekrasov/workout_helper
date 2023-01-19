@@ -5,6 +5,11 @@ from app.settings import Settings
 from app.core.common.base.uow import UnitOfWork
 from app.core.common.mediator import Mediator
 from app.core.common.base.exceptions import ValidationError
+from app.core.user.exceptions.auth import (
+    SessionNotFoundException,
+    InvalidCredentialsException,
+    InvalidTokenException,
+)
 from app.core.user.protocols.token_gateway import TokenGateway
 from app.core.workout.protocols.analysis import AnalysisSportsGround
 from app.core.workout.protocols.grounds_gateway import (
@@ -97,9 +102,18 @@ class ApplicationBuilder:
         self._app.on_stop += on_shutdown
 
     def _setup_exc_handlers(self) -> None:
-        self._app.exception_handler(ValidationError)(
-            controllers.validation_error_handler
-        )
+        self._app.exceptions_handlers[
+            ValidationError
+        ] = controllers.validation_error_handler
+        self._app.exceptions_handlers[
+            SessionNotFoundException
+        ] = controllers.auth_error_handler
+        self._app.exceptions_handlers[
+            InvalidCredentialsException
+        ] = controllers.auth_error_handler
+        self._app.exceptions_handlers[
+            InvalidTokenException
+        ] = controllers.auth_error_handler
 
     def build(self) -> Application:
         start_mappers()

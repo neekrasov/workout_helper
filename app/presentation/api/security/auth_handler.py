@@ -11,7 +11,6 @@ from app.core.user.usecases.get_current_user import (
     GetCurrentUserCommand,
 )
 from app.core.common.base.types import SessionId
-from app.core.user.exceptions.auth import SessionNotFoundException
 
 
 class AuthHandler(BaseAuthenticationHandler):
@@ -25,18 +24,12 @@ class AuthHandler(BaseAuthenticationHandler):
         header_value = context.get_first_header(b"Authorization")
         if header_value:
             session_id = header_value.decode("utf-8")
-            try:
-                try:
-                    user = await self._mediator.send(
-                        GetCurrentUserCommand(
-                            SessionId(uuid.UUID(session_id))
-                        )
-                    )
-                except ValueError:
-                    user = None
-                context.identity = cast(Identity, user)
-            except SessionNotFoundException:
-                context.identity = None
+            user = await self._mediator.send(
+                GetCurrentUserCommand(
+                    SessionId(uuid.UUID(session_id))
+                )
+            )
+            context.identity = cast(Identity, user)
         else:
             context.identity = None
         return context.identity

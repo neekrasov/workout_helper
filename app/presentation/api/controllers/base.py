@@ -1,5 +1,4 @@
 import abc
-import http
 from typing import Any, TypeVar, Optional, Callable
 from blacksheep.server.controllers import ApiController
 from blacksheep.server.openapi.common import EndpointDocs
@@ -9,6 +8,9 @@ from guardpost.authentication import User as GuardpostUser
 
 from app.settings import Settings
 from app.core.common.mediator import Mediator
+from app.core.user.exceptions.auth import (
+    InvalidTokenException,
+)
 
 _HandlerType = TypeVar("_HandlerType", bound=Callable[..., Any])
 
@@ -57,12 +59,7 @@ class BaseController(ApiController):
 
     def _check_user_auth(self, user: GuardpostUser):
         if not user:
-            return self.pretty_json(
-                status=http.HTTPStatus.UNAUTHORIZED,
-                data={
-                    "detail": "User is not authorized",
-                },
-            )
+            raise InvalidTokenException
 
     def _make_detail(self, detail: str) -> dict:
         return {"detail": detail}
