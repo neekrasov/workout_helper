@@ -8,6 +8,7 @@ import time
 import typing as t
 import pandas as pd
 import numpy as np
+from celery import Celery
 from functools import partial
 from sqlalchemy.engine import create_engine
 from selenium import webdriver
@@ -181,12 +182,9 @@ def save_data_to_csv(data: pd.DataFrame, path: str):
     data.to_csv(path)
 
 
-def main():
-    settings = Settings()
-    url = settings.dataset.parse_url
-    dataset_path = settings.dataset.dataset_path
-    postges_url = settings.postgres.postgres_url.replace("+asyncpg", "")
-
+def main(
+    parse_url: str, dataset_path: str, postgres_url: str, cosine_sim_path: str
+):
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
@@ -201,7 +199,7 @@ def main():
 
     print("Chrome driver is started")
     print("Getting data from URL...")
-    find_zip(url, browser)
+    find_zip(parse_url, browser)
     print("Downloading zip file...")
     time.sleep(10)
     bytes = download_zip(browser)
@@ -221,19 +219,28 @@ def main():
     print("Calculating cosine similarity...")
     cosine_sim = calculate_cosine_sim(data)
     print("Saving cosine similarity to CSV...")
-    save_cosine_sim_to_csv(
-        cosine_sim, settings.dataset.recomm_cosine_sim_path
-    )
+    save_cosine_sim_to_csv(cosine_sim, cosine_sim_path)
     data = adapt_dataset_to_db_schema(data)
     print("Inserting data to DB...")
-    insert_data_to_db(data, postges_url)
+    insert_data_to_db(data, postgres_url)
     print("Done!")
 
     browser.close()
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("Exiting...")
+    settings = Settings()
+    celery = Celery(
+        "app",
+        backend=settings.redis.redis_url,
+        broker=settings.redis.redis_url,
+    )
+    celery.send_task(
+        "update_dataset",
+        args=(
+            settings.dataset.parse_url,
+            settings.dataset.dataset_path,
+            settings.postgres.postgres_url.replace("+asyncpg", ""),
+            settings.dataset.recomm_cosine_sim_path,
+        ),
+    )

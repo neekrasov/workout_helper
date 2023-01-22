@@ -6,6 +6,7 @@ from .tasks import (
     get_nearest_grounds,
     search_grounds,
     get_recommendations,
+    update_dataset,
 )
 from .factories import build_mediator
 
@@ -31,6 +32,7 @@ def build_celery() -> Celery:
     app.task(get_nearest_grounds_task, name="get_nearest_grounds")
     app.task(search_grounds_task, name="search_grounds")
     app.task(get_recommendations_task, name="get_recommendations")
+    app.task(update_dataset, name="update_dataset")
     return app
 
 

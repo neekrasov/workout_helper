@@ -8,11 +8,9 @@ packages = [{include = "workout_helper"}]
 
 [tool.poetry.dependencies]
 python = "3.11"
-notebook = "^6.5.2"
 numpy = "^1.24.1"
 pandas = "^1.5.2"
 openpyxl = "^3.0.10"
-ipykernel = "^6.19.4"
 redis = "^4.4.0"
 sqlalchemy = "^1.4.45"
 pyjwt = "^2.6.0"
@@ -34,6 +32,8 @@ gunicorn = "^20.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
+ipykernel = "^6.19.4"
+notebook = "^6.5.2"
 flake8 = "^6.0.0"
 black = "^22.12.0"
 mypy = "^0.991"
