@@ -6,7 +6,12 @@ from app.settings import Settings
 
 
 def test_update_dataset(settings: Settings):
-    main()
+    main(
+        settings.dataset.parse_url,
+        settings.dataset.dataset_path,
+        settings.postgres.postgres_url.replace("+asyncpg", ""),
+        settings.dataset.recomm_cosine_sim_path,
+    )
 
     engine = create_engine(
         settings.postgres.postgres_url.replace("+asyncpg", "")

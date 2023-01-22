@@ -134,6 +134,17 @@ def find_zip(url: str, browser: webdriver.Chrome):
     button.click()
 
 
+def get_options() -> webdriver.ChromeOptions:
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--window-size=1920,1080")
+    chrome_options.add_argument("--start-maximized")
+    chrome_options.add_argument("--headless")
+    return chrome_options
+
+
 def download_zip(browser: webdriver.Chrome) -> t.Optional[io.BytesIO]:
     soup = bs4.BeautifulSoup(browser.page_source, "html.parser")
     try:
@@ -185,16 +196,8 @@ def save_data_to_csv(data: pd.DataFrame, path: str):
 def main(
     parse_url: str, dataset_path: str, postgres_url: str, cosine_sim_path: str
 ):
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--window-size=1920,1080")
-    chrome_options.add_argument("--start-maximized")
-    chrome_options.add_argument("--headless")
-
     browser = webdriver.Chrome(
-        service=Service("/usr/bin/chromedriver"), options=chrome_options
+        service=Service("/usr/bin/chromedriver"), options=get_options()
     )
 
     print("Chrome driver is started")
