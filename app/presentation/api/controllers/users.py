@@ -6,12 +6,11 @@ from blacksheep.server.openapi.common import (
     ResponseInfo,
     ContentInfo,
 )
-from app.core.user.entities.user import User
 from app.core.user.services.auth_service import AuthUserService
 from app.core.user.exceptions.users import UserAlreadyExistsException
 from app.core.user.usecases.create_user import CreateUserCommand
 from .base import BaseController
-from ..models.user import UserCreateRequest
+from ..models.user import UserCreateRequest, UserResponse
 from app.resources import strings
 
 
@@ -83,7 +82,7 @@ class UsersController(BaseController):
                         description="Current user",
                         content=[
                             ContentInfo(
-                                type=User
+                                type=UserResponse
                             )
                         ]
                     )

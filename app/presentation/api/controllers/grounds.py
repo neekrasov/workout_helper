@@ -328,21 +328,9 @@ class GroundsController(BaseController):
                     ),
                 },
                 responses={
-                    200: ResponseInfo(
-                        description="Task ID to get updates.",
-                        content=[
-                            ContentInfo(
-                                type=CalculationResult[TaskId],
-                                examples=[
-                                    CalculationResult(
-                                        type=ResultType.ID,
-                                        status=ResultStatus.SUCCESS,
-                                        data=TaskId("92a877b1-b657-4d0e-a749-9f4f244fdca2"), # noqa
-                                    ),
-                                ],
-                            ),
-                        ],
-                    ),
+                    200: ResponseInfo("Ground liked by user {user.id}"),
+                    404: ResponseInfo(strings.GROUNDS_NOT_FOUND),
+                    400: ResponseInfo(strings.USER_ALREADY_LIKED_GROUND),
                 },
             ),
         )

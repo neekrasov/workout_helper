@@ -13,15 +13,19 @@ class MediatorImpl(Mediator):
         try:
             handler = self._handlers[type(command)]
         except KeyError:
-            raise CommandNotFoundException(command)
+            raise CommandNotFoundException(
+                f"Command {command.__class__} not binded"
+            )
         return await handler(command)
 
-    def bind(self, command: Type[Command], handler: UseCase):
-        self._handlers[command] = handler
+    def bind(self, command: Type[Command], usecase: UseCase):
+        self._handlers[command] = usecase
 
     def send_sync(self, command: Command) -> Any:
         try:
             handler = self._handlers[type(command)]
         except KeyError:
-            raise CommandNotFoundException(command)
+            raise CommandNotFoundException(
+                f"Command {command.__class__} not binded"
+            )
         return handler(command)

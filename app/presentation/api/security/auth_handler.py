@@ -14,6 +14,7 @@ from app.core.user.exceptions.auth import (
     SessionNotFoundException,
 )
 from app.core.common.base.types import SessionId
+from ..models.user import UserResponse
 
 
 class AuthHandler(BaseAuthenticationHandler):
@@ -28,9 +29,15 @@ class AuthHandler(BaseAuthenticationHandler):
                 user = await self._mediator.send(
                     GetCurrentUserCommand(SessionId(uuid.UUID(session_id)))
                 )
+                user_response = UserResponse(
+                    user.email,
+                    user.username,
+                    user.id,
+                    user.hashed_password,
+                )
             except ValueError:
                 raise SessionNotFoundException
-            context.identity = cast(Identity, user)
+            context.identity = cast(Identity, user_response)
         else:
             context.identity = None
         return context.identity
