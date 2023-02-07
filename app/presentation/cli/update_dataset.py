@@ -59,7 +59,7 @@ def main(
         print("The service is not available")
         return
     print("Processing data...")
-    base_processing_handler.handle(data)
+    data = base_processing_handler.handle(data)
     print("Calculating cosine similarity...")
     similarity_handler.handle(data)
     print("Inserting data to DB...")

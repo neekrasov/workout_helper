@@ -69,7 +69,7 @@ class BaseProcessingDatasetHandler(DatasetHandler):
         self._saver.save(data, self._path)
         return data
 
-    def _combine_features(row, features):
+    def _combine_features(self, row, features):
         data = [f"{str(feature)}:{str(row[feature])} " for feature in features]
         return " ".join(data)
 

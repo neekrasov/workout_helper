@@ -61,7 +61,7 @@ class DatasetLoaderImpl(DatasetLoader):
         return (file, file_list)  # type: ignore
 
     def _get_dataframe_from_bytes(
-        file, encoding="Windows-1251"
+        self, file: bytes, encoding="Windows-1251"
     ) -> pd.DataFrame:
         data = pd.read_json(file, encoding=encoding)
         return data
@@ -90,7 +90,7 @@ class DatasetToDBSaverImpl(DatasetToDBSaver):
             method=self._insert_do_nothing_on_conflicts,
         )
 
-    def _insert_do_nothing_on_conflicts(sqltable, conn, keys, data_iter):
+    def _insert_do_nothing_on_conflicts(self, sqltable, conn, keys, data_iter):
         """
         Execute SQL statement inserting data
 
